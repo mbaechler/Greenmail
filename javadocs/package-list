@@ -1,0 +1,12 @@
+com.icegreen.greenmail
+com.icegreen.greenmail.foedus.util
+com.icegreen.greenmail.imap
+com.icegreen.greenmail.imap.commands
+com.icegreen.greenmail.mail
+com.icegreen.greenmail.pop3
+com.icegreen.greenmail.pop3.commands
+com.icegreen.greenmail.smtp
+com.icegreen.greenmail.smtp.commands
+com.icegreen.greenmail.store
+com.icegreen.greenmail.user
+com.icegreen.greenmail.util

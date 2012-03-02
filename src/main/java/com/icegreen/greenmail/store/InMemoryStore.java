@@ -471,7 +471,7 @@ public class InMemoryStore
             return matchedUids;
         }
 
-        public void copyMessage(long uid, MailFolder toFolder)
+        public long copyMessage(long uid, MailFolder toFolder)
                 throws FolderException {
             SimpleStoredMessage originalMessage = getMessage(uid);
             MimeMessage newMime = null;
@@ -485,7 +485,7 @@ public class InMemoryStore
             newFlags.add(originalMessage.getFlags());
             Date newDate = originalMessage.getInternalDate();
 
-            toFolder.appendMessage(newMime, newFlags, newDate);
+            return toFolder.appendMessage(newMime, newFlags, newDate);
         }
 
         public void expunge() throws FolderException {

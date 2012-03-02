@@ -78,14 +78,16 @@ class CopyCommand extends SelectedStateCommand implements UidEnabledCommand {
             }
         }
         
-        String copyUidResponse = buildCOPYUIDResponse(uidsOfCopiedAndNewMessages);
+        String copyUidResponse = buildCOPYUIDResponse(uidsOfCopiedAndNewMessages, currentMailbox.getUidValidity());
         session.unsolicitedResponses(response);
         response.taggedResponseCompleted(copyUidResponse);
     }
 
-    private String buildCOPYUIDResponse(Map uidsOfCopiedAndNewMessages) {
+    private String buildCOPYUIDResponse(Map uidsOfCopiedAndNewMessages, long mailboxUidValidity) {
     	String UID_SEPARATOR = " ";
-    	StringBuilder builder = new StringBuilder("[COPYUID 9999999");
+    	StringBuilder builder = new StringBuilder("[COPYUID ");
+    	builder.append(mailboxUidValidity);
+    	
     	Iterator uidsIterator = uidsOfCopiedAndNewMessages.entrySet().iterator();
 		while (uidsIterator.hasNext()) {
 			Entry uids = (Entry) uidsIterator.next();

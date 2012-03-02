@@ -6,6 +6,14 @@
  */
 package com.icegreen.greenmail.imap.commands;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
 import com.icegreen.greenmail.imap.*;
 import com.icegreen.greenmail.store.FolderException;
 import com.icegreen.greenmail.store.MailFolder;
@@ -53,6 +61,7 @@ class CopyCommand extends SelectedStateCommand implements UidEnabledCommand {
 //        }
 //        currentMailbox.copyMessages(toMailbox, idSet);
         long[] uids = currentMailbox.getMessageUids();
+        Map uidsOfCopiedAndNewMessages = new LinkedHashMap(uids.length);
         for (int i = 0; i < uids.length; i++) {
             long uid = uids[i];
             boolean inSet;
@@ -64,15 +73,32 @@ class CopyCommand extends SelectedStateCommand implements UidEnabledCommand {
             }
 
             if (inSet) {
-                currentMailbox.copyMessage(uid, toFolder);
+            	long newMessageUid = currentMailbox.copyMessage(uid, toFolder);
+				uidsOfCopiedAndNewMessages.put(Long.valueOf(uid), Long.valueOf(newMessageUid));
             }
         }
-
+        
+        String copyUidResponse = buildCOPYUIDResponse(uidsOfCopiedAndNewMessages);
         session.unsolicitedResponses(response);
-        response.commandComplete(this);
+        response.taggedResponseCompleted(copyUidResponse);
     }
 
-    /**
+    private String buildCOPYUIDResponse(Map uidsOfCopiedAndNewMessages) {
+    	String UID_SEPARATOR = " ";
+    	StringBuilder builder = new StringBuilder("[COPYUID 9999999");
+    	Iterator uidsIterator = uidsOfCopiedAndNewMessages.entrySet().iterator();
+		while (uidsIterator.hasNext()) {
+			Entry uids = (Entry) uidsIterator.next();
+			builder.append(UID_SEPARATOR);
+    		builder.append(uids.getKey());
+			builder.append(UID_SEPARATOR);
+    		builder.append(uids.getValue());
+    	}
+    	builder.append("]");
+    	return builder.toString();
+	}
+
+	/**
      * @see ImapCommand#getName
      */
     public String getName() {

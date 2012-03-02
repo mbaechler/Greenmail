@@ -188,6 +188,14 @@ public class ImapResponse implements ImapConstants {
         end();
     }
 
+    public void taggedResponseCompleted(String message) {
+    	tag();
+        message(OK);
+        message(message);
+        message("completed.");
+        end();
+    }
+    
     /**
      * Writes the message provided to the client, prepended with the
      * untagged marker "*".

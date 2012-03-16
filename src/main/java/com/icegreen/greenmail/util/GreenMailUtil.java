@@ -71,10 +71,8 @@ public class GreenMailUtil {
 
     /**
      * Convenience method which creates a new {@link MimeMessage} from a string
-     *
-     * @throws MessagingException
      */
-    public static MimeMessage newMimeMessage(String mailString) throws MessagingException {
+    public static MimeMessage newMimeMessage(String mailString) {
         try {
             byte[] bytes = mailString.getBytes("US-ASCII");
             return newMimeMessage(new ByteArrayInputStream(bytes));
@@ -252,7 +250,7 @@ public class GreenMailUtil {
         return session;
     }
 
-    public static void sendAttachmentEmail(String to, String from, String subject, String msg, final byte[] attachment, final String contentType, final String filename, final String description, final ServerSetup setup) throws MessagingException, IOException {
+    public static void sendAttachmentEmail(String to, String from, String subject, String msg, final byte[] attachment, final String contentType, final String filename, final String description, final ServerSetup setup) throws MessagingException {
         Session session = getSession(setup);
 
         Address[] tos = new InternetAddress[]{new InternetAddress(to)};

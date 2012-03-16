@@ -9,6 +9,7 @@ package com.icegreen.greenmail.imap;
 import com.icegreen.greenmail.user.GreenMailUser;
 import com.icegreen.greenmail.store.FolderException;
 import com.icegreen.greenmail.store.MailFolder;
+import com.icegreen.greenmail.store.SimpleStoredMessage;
 import com.icegreen.greenmail.store.Store;
 import com.icegreen.greenmail.store.InMemoryStore;
 
@@ -40,13 +41,13 @@ public class ImapHostManagerImpl
         subscriptions = new MailboxSubscriptions();
     }
 
-    public List getAllMessages() {
-        List ret = new ArrayList();
+    public List<SimpleStoredMessage> getAllMessages() {
+        List<SimpleStoredMessage> ret = new ArrayList<SimpleStoredMessage>();
         try {
-            Collection boxes = store.listMailboxes("*");
-            for (Iterator iterator = boxes.iterator(); iterator.hasNext();) {
-                MailFolder folder = (MailFolder) iterator.next();
-                List messages = folder.getMessages();
+            Collection<MailFolder> boxes = store.listMailboxes("*");
+            for (Iterator<MailFolder> iterator = boxes.iterator(); iterator.hasNext();) {
+                MailFolder folder = iterator.next();
+                List<SimpleStoredMessage> messages = folder.getMessages();
                 for (int i = 0; i < messages.size(); i++) {
                     ret.add(messages.get(i));
                 }
@@ -193,7 +194,7 @@ public class ImapHostManagerImpl
     /**
      * @see ImapHostManager#listSubscribedMailboxes
      */
-    public Collection listSubscribedMailboxes(GreenMailUser user,
+    public Collection<MailFolder> listSubscribedMailboxes(GreenMailUser user,
                                               String mailboxPattern)
             throws FolderException {
         return listMailboxes(user, mailboxPattern, true);
@@ -202,7 +203,7 @@ public class ImapHostManagerImpl
     /**
      * @see ImapHostManager#listMailboxes
      */
-    public Collection listMailboxes(GreenMailUser user,
+    public Collection<MailFolder> listMailboxes(GreenMailUser user,
                                     String mailboxPattern)
             throws FolderException {
         return listMailboxes(user, mailboxPattern, false);
@@ -215,19 +216,19 @@ public class ImapHostManagerImpl
      *
      * @see com.icegreen.greenmail.imap.ImapHostManager#listMailboxes
      */
-    private Collection listMailboxes(GreenMailUser user,
+    private Collection<MailFolder> listMailboxes(GreenMailUser user,
                                      String mailboxPattern,
                                      boolean subscribedOnly)
             throws FolderException {
 //        System.out.println( "Listing for user: '" + user.getUserName() + "'" +
 //                            " pattern:'" + mailboxPattern + "'" );
 
-        ArrayList mailboxes = new ArrayList();
+        ArrayList<MailFolder> mailboxes = new ArrayList<MailFolder>();
         String qualifiedPattern = getQualifiedMailboxName(user, mailboxPattern);
 
-        Iterator iter = store.listMailboxes(qualifiedPattern).iterator();
+        Iterator<MailFolder> iter = store.listMailboxes(qualifiedPattern).iterator();
         while (iter.hasNext()) {
-            MailFolder folder = (MailFolder) iter.next();
+            MailFolder folder = iter.next();
 
             // TODO check subscriptions.
             if (subscribedOnly) {
@@ -303,7 +304,7 @@ public class ImapHostManagerImpl
      * TODO persist
      */
     private class MailboxSubscriptions {
-        private Map userSubs = new HashMap();
+        private Map<String, Collection<String>> userSubs = new HashMap<String, Collection<String>>();
 
         /**
          * Subscribes the user to the store.
@@ -311,10 +312,8 @@ public class ImapHostManagerImpl
          *
          * @param user   The user making the subscription
          * @param folder The store to subscribe
-         * @throws FolderException ??? doesn't yet.
          */
-        void subscribe(GreenMailUser user, MailFolder folder)
-                throws FolderException {
+        void subscribe(GreenMailUser user, MailFolder folder) {
             getUserSubs(user).add(folder.getFullName());
         }
 
@@ -324,10 +323,8 @@ public class ImapHostManagerImpl
          *
          * @param user   The user making the request.
          * @param folder The store to unsubscribe
-         * @throws FolderException ?? doesn't yet
          */
-        void unsubscribe(GreenMailUser user, MailFolder folder)
-                throws FolderException {
+        void unsubscribe(GreenMailUser user, MailFolder folder) {
             getUserSubs(user).remove(folder.getFullName());
         }
 
@@ -342,10 +339,10 @@ public class ImapHostManagerImpl
             return getUserSubs(user).contains(folder.getFullName());
         }
 
-        private Collection getUserSubs(GreenMailUser user) {
-            Collection subs = (Collection) userSubs.get(user.getLogin());
+        private Collection<String> getUserSubs(GreenMailUser user) {
+            Collection<String> subs = userSubs.get(user.getLogin());
             if (subs == null) {
-                subs = new ArrayList();
+                subs = new ArrayList<String>();
                 userSubs.put(user.getLogin(), subs);
             }
             return subs;

@@ -11,9 +11,9 @@ package com.icegreen.greenmail.imap.commands;
  * @version $Revision: 109034 $
  */
 class ExamineCommand extends SelectCommand {
-    public static final String NAME = "EXAMINE";
+    public static final String EXAMINE_COMMAND_NAME = "EXAMINE";
 
     public String getName() {
-        return NAME;
+        return EXAMINE_COMMAND_NAME;
     }
 }

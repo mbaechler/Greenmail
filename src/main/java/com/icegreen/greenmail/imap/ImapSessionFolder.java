@@ -6,26 +6,32 @@
  */
 package com.icegreen.greenmail.imap;
 
-import com.icegreen.greenmail.mail.MovingMessage;
-import com.icegreen.greenmail.imap.commands.IdRange;
-import com.icegreen.greenmail.store.FolderException;
-import com.icegreen.greenmail.store.FolderListener;
-import com.icegreen.greenmail.store.MailFolder;
-import com.icegreen.greenmail.store.SimpleStoredMessage;
-import com.icegreen.greenmail.foedus.util.MsgRangeFilter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import javax.mail.Flags;
 import javax.mail.internet.MimeMessage;
 import javax.mail.search.SearchTerm;
-import java.util.*;
+
+import com.icegreen.greenmail.foedus.util.MsgRangeFilter;
+import com.icegreen.greenmail.mail.MovingMessage;
+import com.icegreen.greenmail.store.FolderException;
+import com.icegreen.greenmail.store.FolderListener;
+import com.icegreen.greenmail.store.MailFolder;
+import com.icegreen.greenmail.store.SimpleStoredMessage;
 
 public class ImapSessionFolder implements MailFolder, FolderListener {
     private MailFolder _folder;
     private ImapSession _session;
     private boolean _readonly;
     private boolean _sizeChanged;
-    private List _expungedMsns = Collections.synchronizedList(new LinkedList());
-    private Map _modifiedFlags = Collections.synchronizedMap(new TreeMap());
+    private List<Integer> _expungedMsns = Collections.synchronizedList(new LinkedList<Integer>());
+    private Map<Integer, FlagUpdate> _modifiedFlags = Collections.synchronizedMap(new TreeMap<Integer, FlagUpdate>());
 
     public ImapSessionFolder(MailFolder folder, ImapSession session, boolean readonly) {
         _folder = folder;
@@ -55,15 +61,15 @@ public class ImapSessionFolder implements MailFolder, FolderListener {
         _folder.signalDeletion();
     }
 
-    public List getMessages(MsgRangeFilter msgRangeFilter) {
+    public List<SimpleStoredMessage> getMessages(MsgRangeFilter msgRangeFilter) {
         return _folder.getMessages(msgRangeFilter);
     }
 
-    public List getMessages() {
+    public List<SimpleStoredMessage> getMessages() {
         return _folder.getMessages();
     }
 
-    public List getNonDeletedMessages() {
+    public List<SimpleStoredMessage> getNonDeletedMessages() {
         return _folder.getNonDeletedMessages();
     }
 
@@ -71,11 +77,11 @@ public class ImapSessionFolder implements MailFolder, FolderListener {
         return _readonly;
     }
 
-    public int[] getExpunged() throws FolderException {
+    public int[] getExpunged() {
         synchronized (_expungedMsns) {
             int[] expungedMsns = new int[_expungedMsns.size()];
             for (int i = 0; i < expungedMsns.length; i++) {
-                int msn = ((Integer) _expungedMsns.get(i)).intValue();
+                int msn = _expungedMsns.get(i);
                 expungedMsns[i] = msn;
             }
             _expungedMsns.clear();
@@ -88,12 +94,12 @@ public class ImapSessionFolder implements MailFolder, FolderListener {
         }
     }
 
-    public List getFlagUpdates() throws FolderException {
+    public List<FlagUpdate> getFlagUpdates() {
         if (_modifiedFlags.isEmpty()) {
             return Collections.EMPTY_LIST;
         }
 
-        List retVal = new ArrayList();
+        List<FlagUpdate> retVal = new ArrayList<FlagUpdate>();
         retVal.addAll(_modifiedFlags.values());
         _modifiedFlags.clear();
         return retVal;
@@ -155,7 +161,7 @@ public class ImapSessionFolder implements MailFolder, FolderListener {
         int correctedMsn = absoluteMsn;
         // Loop throught the expunged list backwards, adjusting the msn as we go.
         for (int i = (_expungedMsns.size() - 1); i >= 0; i--) {
-            Integer expunged = (Integer) _expungedMsns.get(i);
+            Integer expunged = _expungedMsns.get(i);
             if (expunged.intValue() <= absoluteMsn) {
                 correctedMsn++;
             }
@@ -213,10 +219,6 @@ public class ImapSessionFolder implements MailFolder, FolderListener {
 
     public void removeListener(FolderListener listener) {
         _folder.removeListener(listener);
-    }
-
-    public IdRange[] msnsToUids(IdRange[] idSet) {
-        return new IdRange[0];  //To change body of created methods use Options | File Templates.
     }
 
     public void setFlags(Flags flags, boolean value, long uid, FolderListener silentListener, boolean addUid) throws FolderException {

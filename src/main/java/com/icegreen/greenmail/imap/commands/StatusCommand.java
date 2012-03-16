@@ -29,7 +29,7 @@ class StatusCommand extends AuthenticatedStateCommand {
     private static final String UIDVALIDITY = "UIDVALIDITY";
     private static final String UNSEEN = "UNSEEN";
 
-    private StatusCommandParser parser = new StatusCommandParser();
+    private StatusCommandParser statusCommandParser = new StatusCommandParser();
 
     /**
      * @see CommandTemplate#doProcess
@@ -38,9 +38,9 @@ class StatusCommand extends AuthenticatedStateCommand {
                              ImapResponse response,
                              ImapSession session)
             throws ProtocolException, FolderException {
-        String mailboxName = parser.mailbox(request);
-        StatusDataItems statusDataItems = parser.statusDataItems(request);
-        parser.endLine(request);
+        String mailboxName = statusCommandParser.mailbox(request);
+        StatusDataItems statusDataItems = statusCommandParser.statusDataItems(request);
+        statusCommandParser.endLine(request);
 
         MailFolder folder = getMailbox(mailboxName, session, true);
 

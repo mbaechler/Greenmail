@@ -10,7 +10,7 @@ import java.util.Map;
 
 
 public class Pop3CommandRegistry {
-    private static Map commands = new HashMap();
+    private static Map<String, Pop3Command> commands = new HashMap<String, Pop3Command>();
     private static Object[][] COMMANDS = new Object[][]
     {
         {"QUIT", QuitCommand.class}, {"STAT", StatCommand.class},
@@ -32,7 +32,7 @@ public class Pop3CommandRegistry {
                 continue;
 
             try {
-                Class type = (Class) COMMANDS[i][1];
+                Class<?> type = (Class<?>) COMMANDS[i][1];
                 Pop3Command command = (Pop3Command) type.newInstance();
                 registerCommand(name, command);
             } catch (Exception e) {
@@ -53,6 +53,6 @@ public class Pop3CommandRegistry {
                 throw new RuntimeException(e);
             }
         }
-        return (Pop3Command) commands.get(name);
+        return commands.get(name);
     }
 }

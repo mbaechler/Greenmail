@@ -106,7 +106,7 @@ public class MultiRequestTest extends TestCase {
         final int num2 = 20;
         assertTrue(num>num2);
         ThreadGroup group = new ThreadGroup(RetrieverThread.class.getName());
-        List retriverThreads = new ArrayList();
+        List<RetrieverThread> retriverThreads = new ArrayList<RetrieverThread>();
         for (int i=(num-num2+1);i<=num;i++) {
             RetrieverThread r = new RetrieverThread("to"+i,new Retriever(greenMail.getPop3()),group);
             retriverThreads.add(r);
@@ -132,8 +132,8 @@ public class MultiRequestTest extends TestCase {
             Thread.sleep(1000);
         }
         int sum = 0;
-        for (Iterator iterator = retriverThreads.iterator(); iterator.hasNext();) {
-            RetrieverThread retrieverThread = (RetrieverThread) iterator.next();
+        for (Iterator<RetrieverThread> iterator = retriverThreads.iterator(); iterator.hasNext();) {
+            RetrieverThread retrieverThread = iterator.next();
             sum += retrieverThread.getCount();
         }
         assertEquals((num*(num+1)/2-num2*(num2+1)/2)*4, sum);

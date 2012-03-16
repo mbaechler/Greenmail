@@ -24,6 +24,7 @@ public class SmtpConnection {
         try {
             serverAddress = InetAddress.getLocalHost();
         } catch (UnknownHostException uhe) {
+        	uhe.printStackTrace();
         }
     }
 

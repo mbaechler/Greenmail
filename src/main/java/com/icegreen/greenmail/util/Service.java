@@ -20,23 +20,13 @@ abstract public class Service extends Thread {
     private volatile boolean keepRunning = false;
     private volatile boolean running = false;
 
-    //---------
-    public void init(Object obj) {
-        //empty
-    }
-
-    public void destroy(Object obj) {
-        //empty
-    }
-
     final protected boolean keepOn() {
         return keepRunning;
     }
 
-    public synchronized void startService(Object obj) {
+    public synchronized void startService() {
         if (!keepRunning) {
             keepRunning = true;
-            init(obj);
             start();
         }
     }
@@ -57,38 +47,20 @@ abstract public class Service extends Thread {
      * Stops the service. If a timeout is given and the service has still not
      * gracefully been stopped after timeout ms the service is stopped by force.
      *
-     * @param obj
-     * @param millis value in ms
      */
-    public synchronized final void stopService(Object obj, Long millis) {
-        boolean doDestroy = keepRunning;
+    public synchronized final void stopService() {
         running = false;
         try {
             if (keepRunning) {
                 keepRunning = false;
                 interrupt();
                 quit();
-                if (null == millis) {
-                    join();
-                } else {
-                    join(millis.longValue());
-                }
+                join();
             }
         } catch (InterruptedException e) {
             //its possible that the thread exits between the lines keepRunning=false and intertupt above
-        } finally {
-            if (doDestroy) {
-                destroy(obj);
-            }
         }
     }
 
-    public final void stopService(Object obj) {
-        stopService(obj, null);
-    }
-
-    public final void stopService(Object obj, long millis) {
-        stopService(obj, new Long(millis));
-    }
 }
 

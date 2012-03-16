@@ -10,7 +10,7 @@ import java.util.Map;
 
 
 public class SmtpCommandRegistry {
-    private static Map commands = new HashMap();
+    private static Map<String, SmtpCommand> commands = new HashMap<String, SmtpCommand>();
     private static Object[][] COMMANDS = new Object[][]
     {
         {"HELO", new HeloCommand()}, {"EHLO", new HeloCommand()},
@@ -50,6 +50,6 @@ public class SmtpCommandRegistry {
                 throw new RuntimeException(e);
             }
         }
-        return (SmtpCommand) commands.get(name);
+        return commands.get(name);
     }
 }

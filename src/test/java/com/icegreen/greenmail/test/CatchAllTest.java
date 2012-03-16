@@ -5,9 +5,6 @@ import com.icegreen.greenmail.util.GreenMailUtil;
 import com.icegreen.greenmail.util.ServerSetupTest;
 import junit.framework.TestCase;
 
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-
 /**
  * @author Wael Chatila
  * @version $Id: $
@@ -25,7 +22,7 @@ public class CatchAllTest extends TestCase {
         super.tearDown();
     }
 
-    public void testSmtpServerBasic() throws MessagingException {
+    public void testSmtpServerBasic() {
         greenMail = new GreenMail(ServerSetupTest.SMTP);
         greenMail.start();
         GreenMailUtil.sendTextEmailTest("to11@domain1.com", "from@localhost.com", "subject", "body");

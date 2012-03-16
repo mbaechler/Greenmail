@@ -8,6 +8,7 @@ package com.icegreen.greenmail.imap.commands;
 
 import com.icegreen.greenmail.imap.ImapSession;
 import com.icegreen.greenmail.store.FolderException;
+import com.icegreen.greenmail.store.MailFolder;
 
 import java.util.Collection;
 
@@ -16,9 +17,9 @@ import java.util.Collection;
  * @version $Revision: 109034 $
  */
 class LsubCommand extends ListCommand {
-    public static final String NAME = "LSUB";
+    public static final String LSUB_COMMAND_NAME = "LSUB";
 
-    protected Collection doList(ImapSession session, String searchPattern)
+    protected Collection<MailFolder> doList(ImapSession session, String searchPattern)
             throws FolderException {
         return session.getHost().listSubscribedMailboxes(session.getUser(), searchPattern);
     }
@@ -27,6 +28,6 @@ class LsubCommand extends ListCommand {
      * @see ImapCommand#getName
      */
     public String getName() {
-        return NAME;
+        return LSUB_COMMAND_NAME;
     }
 }

@@ -9,6 +9,7 @@ package com.icegreen.greenmail.imap;
 import com.icegreen.greenmail.user.GreenMailUser;
 import com.icegreen.greenmail.store.FolderException;
 import com.icegreen.greenmail.store.MailFolder;
+import com.icegreen.greenmail.store.SimpleStoredMessage;
 
 import java.util.Collection;
 import java.util.List;
@@ -31,7 +32,7 @@ import java.util.List;
  */
 public interface ImapHostManager {
 
-    List getAllMessages();
+    List<SimpleStoredMessage> getAllMessages();
     /**
      * Returns the hierarchy delimiter for mailboxes on this host.
      *
@@ -189,7 +190,7 @@ public interface ImapHostManager {
      *          referenceName and mailbox name resolve to a single mailbox which does
      *          not exist locally.
      */
-    Collection listMailboxes(GreenMailUser user,
+    Collection<MailFolder> listMailboxes(GreenMailUser user,
                              String mailboxPattern)
             throws FolderException;
 
@@ -228,7 +229,7 @@ public interface ImapHostManager {
      *          referenceName and mailbox name resolve to a single mailbox which does
      *          not exist locally.
      */
-    Collection listSubscribedMailboxes(GreenMailUser user,
+    Collection<MailFolder> listSubscribedMailboxes(GreenMailUser user,
                                        String mailboxPattern)
             throws FolderException;
 

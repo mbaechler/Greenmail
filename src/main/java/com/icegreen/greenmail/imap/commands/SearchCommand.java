@@ -26,7 +26,7 @@ class SearchCommand extends SelectedStateCommand implements UidEnabledCommand {
     public static final String NAME = "SEARCH";
     public static final String ARGS = "<search term>";
 
-    private SearchCommandParser parser = new SearchCommandParser();
+    private SearchCommandParser searchCommandParserr = new SearchCommandParser();
 
     /**
      * @see CommandTemplate#doProcess
@@ -44,8 +44,8 @@ class SearchCommand extends SelectedStateCommand implements UidEnabledCommand {
                           boolean useUids)
             throws ProtocolException, FolderException {
         // Parse the search term from the request
-        SearchTerm searchTerm = parser.searchTerm(request);
-        parser.endLine(request);
+        SearchTerm searchTerm = searchCommandParserr.searchTerm(request);
+        searchCommandParserr.endLine(request);
 
         MailFolder folder = session.getSelected();
         long[] uids = folder.search(searchTerm);

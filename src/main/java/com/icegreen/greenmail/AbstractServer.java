@@ -15,7 +15,6 @@ import java.net.ServerSocket;
 import java.net.UnknownHostException;
 import java.net.BindException;
 import java.util.Vector;
-import javax.net.ssl.SSLServerSocket;
 
 /**
  * @author Wael Chatila
@@ -25,7 +24,7 @@ import javax.net.ssl.SSLServerSocket;
 public abstract class AbstractServer extends Service {
     protected final InetAddress bindTo;
     protected ServerSocket serverSocket = null;
-    protected Vector handlers = null;
+    protected Vector<Thread> handlers = null;
     protected Managers managers;
     protected ServerSetup setup;
 
@@ -37,7 +36,7 @@ public abstract class AbstractServer extends Service {
             throw new RuntimeException(e);
         }
         this.managers = managers;
-        handlers = new Vector();
+        handlers = new Vector<Thread>();
     }
 
     protected synchronized ServerSocket openServerSocket() throws IOException {
@@ -54,7 +53,9 @@ public abstract class AbstractServer extends Service {
                 try {
                     retEx = e;
                     Thread.sleep(10);
-                } catch (InterruptedException ignored) {}
+                } catch (InterruptedException ignored) {
+                	ignored.printStackTrace();
+                }
             }
         }
         if (null == ret && null != retEx) {

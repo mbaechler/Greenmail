@@ -13,8 +13,8 @@ import javax.mail.internet.MimeMessage;
 
 public interface GreenMailUser {
     String getEmail();
-    String getLogin();
 
+    String getLogin();
     void deliver(MovingMessage msg) throws UserException;
     void deliver(MimeMessage msg) throws UserException;
 

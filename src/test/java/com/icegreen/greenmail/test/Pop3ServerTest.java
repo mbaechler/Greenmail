@@ -79,7 +79,7 @@ public class Pop3ServerTest extends TestCase {
         Retriever retriever = new Retriever(greenMail.getPop3());
         boolean login_failed = false;
         try {
-            Message[] messages = retriever.getMessages(to, "wrongpassword");
+            retriever.getMessages(to, "wrongpassword");
         } catch (Throwable e) {
             login_failed = true;
         }

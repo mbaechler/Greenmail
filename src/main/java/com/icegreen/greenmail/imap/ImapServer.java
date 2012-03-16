@@ -6,15 +6,13 @@
 */
 package com.icegreen.greenmail.imap;
 
+import java.io.IOException;
+import java.net.Socket;
+import java.util.Iterator;
+
 import com.icegreen.greenmail.AbstractServer;
 import com.icegreen.greenmail.Managers;
 import com.icegreen.greenmail.util.ServerSetup;
-
-import java.io.IOException;
-import java.net.BindException;
-import java.net.Socket;
-import java.util.Vector;
-import java.util.Iterator;
 
 public final class ImapServer extends AbstractServer {
 
@@ -26,7 +24,7 @@ public final class ImapServer extends AbstractServer {
 
     public synchronized void quit() {
         try {
-            for (Iterator iterator = handlers.iterator(); iterator.hasNext();) {
+            for (Iterator<Thread> iterator = handlers.iterator(); iterator.hasNext();) {
                 ImapHandler imapHandler = (ImapHandler) iterator.next();
                 imapHandler.resetHandler();
             }

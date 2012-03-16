@@ -40,7 +40,7 @@ public class RcptCommand
 
                     MailAddress toAddr = new MailAddress(to);
 
-                    String err = manager.checkRecipient(state, toAddr);
+                    String err = manager.checkRecipient(state);
                     if (err != null) {
                         conn.println(err);
 

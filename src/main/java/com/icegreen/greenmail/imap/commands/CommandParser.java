@@ -6,26 +6,26 @@
  */
 package com.icegreen.greenmail.imap.commands;
 
-import com.icegreen.greenmail.imap.ImapConstants;
-import com.icegreen.greenmail.imap.ImapRequestLineReader;
-import com.icegreen.greenmail.imap.ProtocolException;
-import com.icegreen.greenmail.store.MessageFlags;
-
-import javax.mail.Flags;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import javax.mail.Flags;
+
+import com.icegreen.greenmail.imap.ImapConstants;
+import com.icegreen.greenmail.imap.ImapRequestLineReader;
+import com.icegreen.greenmail.imap.ProtocolException;
+import com.icegreen.greenmail.store.MessageFlags;
+
 /**
  * @author Darrell DeBoer <darrell@apache.org>
  * @version $Revision: 109034 $
  */
 public class CommandParser {
-    private static final char[] EMPTY_CHAR_ARRAY = new char[0];
 
-    /**
+	/**
      * Reads an argument of type "atom" from the request.
      */
     public String atom(ImapRequestLineReader request) throws ProtocolException {
@@ -264,13 +264,6 @@ public class CommandParser {
     }
 
     /**
-     * Reads a base64 argument from the request.
-     */
-    public byte[] base64(ImapRequestLineReader request) throws ProtocolException {
-        return null;
-    }
-
-    /**
      * Reads a "flags" argument from the request.
      */
     public Flags flagList(ImapRequestLineReader request) throws ProtocolException {
@@ -333,10 +326,6 @@ public class CommandParser {
         return (chr >= 0x01 && chr <= 0x7f);
     }
 
-    private boolean isCHAR8(char chr) {
-        return (chr >= 0x01 && chr <= 0xff);
-    }
-
     protected boolean isListWildcard(char chr) {
         return (chr == '*' || chr == '%');
     }
@@ -369,7 +358,7 @@ public class CommandParser {
             return new IdRange[]{parseRange(nextWord)};
         }
 
-        ArrayList rangeList = new ArrayList();
+        ArrayList<IdRange> rangeList = new ArrayList<IdRange>();
         int pos = 0;
         while (commaPos != -1) {
             String range = nextWord.substring(pos, commaPos);
@@ -381,7 +370,7 @@ public class CommandParser {
         }
         String range = nextWord.substring(pos);
         rangeList.add(parseRange(range));
-        return (IdRange[]) rangeList.toArray(new IdRange[rangeList.size()]);
+        return rangeList.toArray(new IdRange[0]);
     }
 
     private IdRange parseRange(String range) throws ProtocolException {

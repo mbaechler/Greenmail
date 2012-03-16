@@ -6,17 +6,28 @@
  */
 package com.icegreen.greenmail.imap.commands;
 
-import com.icegreen.greenmail.util.GreenMailUtil;
-import com.icegreen.greenmail.imap.*;
-import com.icegreen.greenmail.store.FolderException;
-import com.icegreen.greenmail.store.MessageFlags;
-import com.icegreen.greenmail.store.SimpleStoredMessage;
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 import javax.mail.Flags;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import java.io.ByteArrayOutputStream;
-import java.util.*;
+
+import com.icegreen.greenmail.imap.ImapRequestLineReader;
+import com.icegreen.greenmail.imap.ImapResponse;
+import com.icegreen.greenmail.imap.ImapSession;
+import com.icegreen.greenmail.imap.ImapSessionFolder;
+import com.icegreen.greenmail.imap.ProtocolException;
+import com.icegreen.greenmail.store.FolderException;
+import com.icegreen.greenmail.store.MessageFlags;
+import com.icegreen.greenmail.store.SimpleStoredMessage;
+import com.icegreen.greenmail.util.GreenMailUtil;
 
 
 /**
@@ -29,7 +40,7 @@ class FetchCommand extends SelectedStateCommand implements UidEnabledCommand {
     public static final String NAME = "FETCH";
     public static final String ARGS = "<message-set> <fetch-profile>";
 
-    private FetchCommandParser parser = new FetchCommandParser();
+    private FetchCommandParser fetchCommandParser = new FetchCommandParser();
 
     /**
      * @see CommandTemplate#doProcess
@@ -46,9 +57,9 @@ class FetchCommand extends SelectedStateCommand implements UidEnabledCommand {
                           ImapSession session,
                           boolean useUids)
             throws ProtocolException, FolderException {
-        IdRange[] idSet = parser.parseIdRange(request);
-        FetchRequest fetch = parser.fetchRequest(request);
-        parser.endLine(request);
+        IdRange[] idSet = fetchCommandParser.parseIdRange(request);
+        FetchRequest fetch = fetchCommandParser.fetchRequest(request);
+        fetchCommandParser.endLine(request);
 
         if (useUids) {
             fetch.uid = true;
@@ -75,7 +86,7 @@ class FetchCommand extends SelectedStateCommand implements UidEnabledCommand {
 
     private String outputMessage(FetchRequest fetch, SimpleStoredMessage message,
                                  ImapSessionFolder folder, boolean useUids)
-            throws FolderException, ProtocolException {
+            throws FolderException {
         // Check if this fetch will cause the "SEEN" flag to be set on this message
         // If so, update the flags, and ensure that a flags response is included in the response.
         boolean ensureFlagsResponse = false;
@@ -133,9 +144,9 @@ class FetchCommand extends SelectedStateCommand implements UidEnabledCommand {
         }
 
         // BODY part responses.
-        Collection elements = fetch.getBodyElements();
-        for (Iterator iterator = elements.iterator(); iterator.hasNext();) {
-            BodyFetchElement fetchElement = (BodyFetchElement) iterator.next();
+        Collection<BodyFetchElement> elements = fetch.getBodyElements();
+        for (Iterator<BodyFetchElement> iterator = elements.iterator(); iterator.hasNext();) {
+            BodyFetchElement fetchElement = iterator.next();
             response.append(SP);
             response.append(fetchElement.getResponseName());
             if (null == fetchElement.getPartial()) {
@@ -176,15 +187,15 @@ class FetchCommand extends SelectedStateCommand implements UidEnabledCommand {
             bytes = doPartial(partial, bytes, response);
             addLiteral(bytes, response);
         } else if (sectionSpecifier.equalsIgnoreCase("HEADER")) {
-            Enumeration inum = mimeMessage.getAllHeaderLines();
+            Enumeration<String> inum = mimeMessage.getAllHeaderLines();
             addHeaders(inum, response);
         } else if (sectionSpecifier.startsWith("HEADER.FIELDS.NOT")) {
             String[] excludeNames = extractHeaderList(sectionSpecifier, "HEADER.FIELDS.NOT".length());
-            Enumeration inum = mimeMessage.getNonMatchingHeaderLines(excludeNames);
+            Enumeration<String> inum = mimeMessage.getNonMatchingHeaderLines(excludeNames);
             addHeaders(inum, response);
         } else if (sectionSpecifier.startsWith("HEADER.FIELDS ")) {
             String[] includeNames = extractHeaderList(sectionSpecifier, "HEADER.FIELDS ".length());
-            Enumeration inum = mimeMessage.getMatchingHeaderLines(includeNames);
+            Enumeration<String> inum = mimeMessage.getMatchingHeaderLines(includeNames);
             addHeaders(inum, response);
         } else if (sectionSpecifier.endsWith("MIME")) {
             String[] strs = sectionSpecifier.trim().split("\\.");
@@ -258,7 +269,7 @@ class FetchCommand extends SelectedStateCommand implements UidEnabledCommand {
     }
 
     private String[] split(String value, String delimiter) {
-        ArrayList strings = new ArrayList();
+        ArrayList<String> strings = new ArrayList<String>();
         int startPos = 0;
         int delimPos;
         while ((delimPos = value.indexOf(delimiter, startPos)) != -1) {
@@ -269,14 +280,14 @@ class FetchCommand extends SelectedStateCommand implements UidEnabledCommand {
         String sub = value.substring(startPos);
         strings.add(sub);
 
-        return (String[]) strings.toArray(new String[0]);
+        return strings.toArray(new String[0]);
     }
 
-    private void addHeaders(Enumeration inum, StringBuffer response) {
-        List lines = new ArrayList();
+    private void addHeaders(Enumeration<String> inum, StringBuffer response) {
+        List<String> lines = new ArrayList<String>();
         int count = 0;
         while (inum.hasMoreElements()) {
-            String line = (String) inum.nextElement();
+            String line = inum.nextElement();
             count += line.length() + 2;
             lines.add(line);
         }
@@ -285,9 +296,9 @@ class FetchCommand extends SelectedStateCommand implements UidEnabledCommand {
         response.append('}');
         response.append("\r\n");
 
-        Iterator lit = lines.iterator();
+        Iterator<String> lit = lines.iterator();
         while (lit.hasNext()) {
-            String line = (String) lit.next();
+            String line = lit.next();
             response.append(line);
             response.append("\r\n");
         }
@@ -450,9 +461,9 @@ class FetchCommand extends SelectedStateCommand implements UidEnabledCommand {
 
         private boolean setSeen = false;
 
-        private Set bodyElements = new HashSet();
+        private Set<BodyFetchElement> bodyElements = new HashSet<BodyFetchElement>();
 
-        public Collection getBodyElements() {
+        public Collection<BodyFetchElement> getBodyElements() {
             return bodyElements;
         }
 

@@ -22,35 +22,33 @@ public class SmtpManager {
     Incoming _incomingQueue;
     UserManager userManager;
     private ImapHostManager imapHostManager;
-    Vector notifyList;
+    Vector<WaitObject> notifyList;
 
     public SmtpManager(ImapHostManager imapHostManager, UserManager userManager) {
         this.imapHostManager = imapHostManager;
         this.userManager = userManager;
         _incomingQueue = new Incoming();
-        notifyList = new Vector();
+        notifyList = new Vector<WaitObject>();
     }
 
-
-    public String checkSender(SmtpState state, MailAddress sender) {
+    public String checkSender() {
         //always ok
         return null;
     }
 
-    public String checkRecipient(SmtpState state, MailAddress rcpt) {
-        MailAddress sender = state.getMessage().getReturnPath();
+    public String checkRecipient(SmtpState state) {
+        state.getMessage().getReturnPath();
         return null;
     }
 
-    public String checkData(SmtpState state) {
-
+    public String checkData() {
         return null;
     }
 
     public synchronized void send(SmtpState state) {
         _incomingQueue.enqueue(state.getMessage());
         for (int i = 0; i < notifyList.size(); i++) {
-            WaitObject o = (WaitObject) notifyList.get(i);
+            WaitObject o = notifyList.get(i);
             synchronized (o) {
                 o.emailReceived();
             }
@@ -112,14 +110,12 @@ public class SmtpManager {
     }
 
     private class Incoming {
-        boolean _stopping;
-
 
         public void enqueue(MovingMessage msg) {
-            Iterator iterator = msg.getRecipientIterator();
+            Iterator<MailAddress> iterator = msg.getRecipientIterator();
             String tos = "";
             while (iterator.hasNext()) {
-                MailAddress username = (MailAddress) iterator.next();
+                MailAddress username = iterator.next();
                 if (tos.length()>0) {
                     tos+=",";
                 }
@@ -132,7 +128,7 @@ public class SmtpManager {
             }
             iterator = msg.getRecipientIterator();
             while (iterator.hasNext()) {
-                MailAddress username = (MailAddress) iterator.next();
+                MailAddress username = iterator.next();
                 handle(msg, username);
             }
 

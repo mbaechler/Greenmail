@@ -37,7 +37,7 @@ public class DummySSLServerSocketFactory extends SSLServerSocketFactory {
             sslcontext.init(kma,
                     new TrustManager[]{new DummyTrustManager()},
                     null);
-            factory = (SSLServerSocketFactory) sslcontext.getServerSocketFactory();
+            factory = sslcontext.getServerSocketFactory();
 //            factory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
         } catch (Exception e) {
             e.printStackTrace();
@@ -61,7 +61,7 @@ public class DummySSLServerSocketFactory extends SSLServerSocketFactory {
         return ssl;
     }
 
-    public static ServerSocketFactory getDefault() {
+    public synchronized static ServerSocketFactory getDefault() {
 //        return SSLServerSocketFactory.getDefault();
         return new DummySSLServerSocketFactory();
     }

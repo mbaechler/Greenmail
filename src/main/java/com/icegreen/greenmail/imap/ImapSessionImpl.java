@@ -8,6 +8,7 @@ package com.icegreen.greenmail.imap;
 
 import com.icegreen.greenmail.user.GreenMailUser;
 import com.icegreen.greenmail.user.UserManager;
+import com.icegreen.greenmail.imap.ImapSessionFolder.FlagUpdate;
 import com.icegreen.greenmail.store.FolderException;
 import com.icegreen.greenmail.store.MailFolder;
 import com.icegreen.greenmail.store.MessageFlags;
@@ -64,11 +65,10 @@ public final class ImapSessionImpl implements ImapSession {
             }
 
             // Message updates
-            List flagUpdates = selected.getFlagUpdates();
-            Iterator iter = flagUpdates.iterator();
+            List<FlagUpdate> flagUpdates = selected.getFlagUpdates();
+            Iterator<FlagUpdate> iter = flagUpdates.iterator();
             while (iter.hasNext()) {
-                ImapSessionFolder.FlagUpdate entry =
-                        (ImapSessionFolder.FlagUpdate) iter.next();
+                ImapSessionFolder.FlagUpdate entry = iter.next();
                 int msn = entry.getMsn();
                 Flags updatedFlags = entry.getFlags();
                 StringBuffer out = new StringBuffer("FLAGS ");

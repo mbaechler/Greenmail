@@ -11,7 +11,6 @@ import junit.framework.TestCase;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
-import java.io.IOException;
 
 /**
  * @author Wael Chatila
@@ -24,7 +23,7 @@ public class GreenMailUtilTest extends TestCase {
         assertEquals("wassup", message.getSubject());
     }
 
-    public void testGetBody() throws MessagingException, IOException {
+    public void testGetBody() {
         MimeMessage message = GreenMailUtil.newMimeMessage(sampleEmail);
         String body = GreenMailUtil.getBody(message);
         assertEquals("Yo wassup Bertil", body.trim());

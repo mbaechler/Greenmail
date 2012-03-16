@@ -54,7 +54,7 @@ public class DataCommand extends SmtpCommand {
         msg.readDotTerminatedContent(new BufferedReader(StreamUtils.splice(new StringReader(value),
                 conn.getReader())));
 
-        String err = manager.checkData(state);
+        String err = manager.checkData();
         if (err != null) {
             conn.println(err);
 

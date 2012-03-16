@@ -38,7 +38,7 @@ public interface Store {
      * @return A read-only collection of {@link MailFolder} instances, which
      *         are the children of the supplied parent.
      */
-    Collection getChildren(MailFolder parent);
+    Collection<? extends MailFolder> getChildren(MailFolder parent);
 
     /**
      * Creates a mailbox under the supplied parent with the given name.
@@ -97,6 +97,6 @@ public interface Store {
      * @return A read-only collection of mailboxes which match this pattern
      * @throws FolderException If the list operation failed
      */
-    Collection listMailboxes(String searchPattern) throws FolderException;
+    Collection<MailFolder> listMailboxes(String searchPattern) throws FolderException;
 
 }

@@ -68,14 +68,9 @@ public class ImapHandler extends Thread implements ImapConstants {
 
     public void run() {
 
-        String remoteHost = "";
-        String remoteIP = "";
-
         try {
             ins = socket.getInputStream();
             in = new BufferedReader(new InputStreamReader(socket.getInputStream(), "ASCII"), 512);
-            remoteIP = socket.getInetAddress().getHostAddress();
-            remoteHost = socket.getInetAddress().getHostName();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -101,6 +96,7 @@ public class ImapHandler extends Thread implements ImapConstants {
                     socket.getInetAddress().getHostAddress());
 
             while (requestHandler.handleRequest(ins, outs, session)) {
+            	//Nothing to do
             }
 
         } catch (Exception e) {
@@ -171,30 +167,6 @@ public class ImapHandler extends Thread implements ImapConstants {
 
         // Clear user data
         session = null;
-    }
-
-    /**
-     * Implements a "stat".  If the handler is currently in
-     * a transaction state, this amounts to a rollback of the
-     * mailbox contents to the beginning of the transaction.
-     * This method is also called when first entering the
-     * transaction state to initialize the handler copies of the
-     * user inbox.
-     */
-    private void stat() {
-//        userMailbox = new Vector();
-//        userMailbox.addElement(DELETED);
-//        for (Iterator it = userInbox.list(); it.hasNext(); ) {
-//            String key = (String) it.next();
-//            MovingMessage mc = userInbox.retrieve(key);
-//            // Retrieve can return null if the mail is no longer in the store.
-//            // In this case we simply continue to the next key
-//            if (mc == null) {
-//                continue;
-//            }
-//            userMailbox.addElement(mc);
-//        }
-//        backupUserMailbox = (Vector) userMailbox.clone();
     }
 
     /**

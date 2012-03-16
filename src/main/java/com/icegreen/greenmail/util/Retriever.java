@@ -80,7 +80,7 @@ public class Retriever {
         store = session.getStore(protocol);
         store.connect(host, port, account, password);
         Folder rootFolder = store.getFolder("INBOX");
-        return (Message[]) getMessages(rootFolder).toArray(new Message[0]);
+        return getMessages(rootFolder).toArray(new Message[0]);
     }
 
     public void logout() {
@@ -91,8 +91,8 @@ public class Retriever {
         }
     }
 
-    private List getMessages(Folder folder) throws MessagingException {
-        List ret = new ArrayList();
+    private List<Message> getMessages(Folder folder) throws MessagingException {
+        List<Message> ret = new ArrayList<Message>();
         if ((folder.getType() & Folder.HOLDS_MESSAGES) != 0) {
             if (!folder.isOpen()) {
                 folder.open(Folder.READ_ONLY);

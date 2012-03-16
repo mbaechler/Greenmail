@@ -33,14 +33,14 @@ public class RetrCommand
             String[] cmdLine = cmd.split(" ");
 
             String msgNumStr = cmdLine[1];
-            List msgList = inbox.getMessages(new MsgRangeFilter(msgNumStr, false));
+            List<SimpleStoredMessage> msgList = inbox.getMessages(new MsgRangeFilter(msgNumStr, false));
             if (msgList.size() != 1) {
                 conn.println("-ERR no such message");
 
                 return;
             }
 
-            SimpleStoredMessage msg = (SimpleStoredMessage) msgList.get(0);
+            SimpleStoredMessage msg = msgList.get(0);
             String email = GreenMailUtil.getWholeMessage(msg.getMimeMessage());
             conn.println("+OK");
             conn.print(new StringReader(email));

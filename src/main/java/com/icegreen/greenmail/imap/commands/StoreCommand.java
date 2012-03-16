@@ -6,13 +6,15 @@
  */
 package com.icegreen.greenmail.imap.commands;
 
-import com.icegreen.greenmail.imap.*;
+import javax.mail.Flags;
+
+import com.icegreen.greenmail.imap.ImapRequestLineReader;
+import com.icegreen.greenmail.imap.ImapResponse;
+import com.icegreen.greenmail.imap.ImapSession;
+import com.icegreen.greenmail.imap.ImapSessionFolder;
+import com.icegreen.greenmail.imap.ProtocolException;
 import com.icegreen.greenmail.store.FolderException;
 import com.icegreen.greenmail.store.FolderListener;
-import com.icegreen.greenmail.store.MessageFlags;
-import com.icegreen.greenmail.store.SimpleStoredMessage;
-
-import javax.mail.Flags;
 
 
 /**
@@ -25,7 +27,7 @@ class StoreCommand extends SelectedStateCommand implements UidEnabledCommand {
     public static final String NAME = "STORE";
     public static final String ARGS = "<Message-set> ['+'|'-']FLAG[.SILENT] <flag-list>";
 
-    private final StoreCommandParser parser = new StoreCommandParser();
+    private final StoreCommandParser storeCommandParser = new StoreCommandParser();
 
     /**
      * @see CommandTemplate#doProcess
@@ -42,10 +44,10 @@ class StoreCommand extends SelectedStateCommand implements UidEnabledCommand {
                           ImapSession session,
                           boolean useUids)
             throws ProtocolException, FolderException {
-        IdRange[] idSet = parser.parseIdRange(request);
-        StoreDirective directive = parser.storeDirective(request);
-        Flags flags = parser.flagList(request);
-        parser.endLine(request);
+        IdRange[] idSet = storeCommandParser.parseIdRange(request);
+        StoreDirective directive = storeCommandParser.storeDirective(request);
+        Flags flags = storeCommandParser.flagList(request);
+        storeCommandParser.endLine(request);
 
         ImapSessionFolder mailbox = session.getSelected();
 //        IdRange[] uidSet;
@@ -90,18 +92,6 @@ class StoreCommand extends SelectedStateCommand implements UidEnabledCommand {
         boolean omitExpunged = (!useUids);
         session.unsolicitedResponses(response, omitExpunged);
         response.commandComplete(this);
-    }
-
-    private void storeFlags(SimpleStoredMessage storedMessage, StoreDirective directive, Flags newFlags) {
-        Flags messageFlags = storedMessage.getFlags();
-        if (directive.getSign() == 0) {
-            messageFlags.remove(MessageFlags.ALL_FLAGS);
-            messageFlags.add(newFlags);
-        } else if (directive.getSign() < 0) {
-            messageFlags.remove(newFlags);
-        } else if (directive.getSign() > 0) {
-            messageFlags.add(newFlags);
-        }
     }
 
     /**

@@ -14,7 +14,6 @@ import com.icegreen.greenmail.foedus.util.InMemoryWorkspace;
 import java.io.IOException;
 import java.net.SocketException;
 import java.net.Socket;
-import java.util.Vector;
 import java.util.Iterator;
 
 public class SmtpServer extends AbstractServer {
@@ -25,7 +24,7 @@ public class SmtpServer extends AbstractServer {
 
     public synchronized void quit() {
         try {
-            for (Iterator iterator = handlers.iterator(); iterator.hasNext();) {
+            for (Iterator<Thread> iterator = handlers.iterator(); iterator.hasNext();) {
                 SmtpHandler smtpHandler = (SmtpHandler) iterator.next();
                 smtpHandler.quit();
             }
@@ -61,6 +60,7 @@ public class SmtpServer extends AbstractServer {
                     handlers.add(smtpHandler);
                     smtpHandler.start();
                 } catch (SocketException ignored) {
+                	ignored.printStackTrace();
                 } catch (IOException e) {
                     e.printStackTrace();
                     break;

@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Iterator;
 
 public class UserManager {
-    Map _users = Collections.synchronizedMap(new HashMap());
+    Map<String, GreenMailUser> _users = Collections.synchronizedMap(new HashMap<String, GreenMailUser>());
     private ImapHostManager imapHostManager;
 
     public UserManager(ImapHostManager imapHostManager) {
@@ -21,14 +21,14 @@ public class UserManager {
     }
 
     public GreenMailUser getUser(String login) {
-        return (GreenMailUser) _users.get(login);
+        return _users.get(login);
     }
 
     public GreenMailUser getUserByEmail(String email) {
         GreenMailUser ret = getUser(email);
         if (null == ret) {
-            for (Iterator it = _users.values().iterator(); it.hasNext();) {
-                GreenMailUser u = (GreenMailUser) it.next();
+            for (Iterator<GreenMailUser> it = _users.values().iterator(); it.hasNext();) {
+                GreenMailUser u = it.next();
                 if (u.getEmail().trim().equalsIgnoreCase(email.trim())) {
                     return u;
                 }
@@ -50,7 +50,7 @@ public class UserManager {
 
     public void deleteUser(GreenMailUser user)
             throws UserException {
-        user = (GreenMailUser) _users.remove(user.getLogin());
+        user = _users.remove(user.getLogin());
         if (user != null)
             user.delete();
     }

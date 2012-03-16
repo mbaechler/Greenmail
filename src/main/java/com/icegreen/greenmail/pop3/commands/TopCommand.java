@@ -35,14 +35,14 @@ public class TopCommand
                 throw new IllegalArgumentException("range and line count required");
 
             String msgNumStr = cmdLine[1];
-            List msgList = inbox.getMessages(new MsgRangeFilter(msgNumStr, false));
+            List<SimpleStoredMessage> msgList = inbox.getMessages(new MsgRangeFilter(msgNumStr, false));
             if (msgList.size() != 1) {
                 conn.println("-ERR no such message");
 
                 return;
             }
 
-            SimpleStoredMessage msg = (SimpleStoredMessage) msgList.get(0);
+            SimpleStoredMessage msg = msgList.get(0);
 
             int numLines = Integer.parseInt(cmdLine[2]);
 

@@ -32,13 +32,13 @@ import java.util.List;
  */
 public class MovingMessage {
     MailAddress returnPath;
-    List toAddresses = new LinkedList();
+    List<MailAddress> toAddresses = new LinkedList<MailAddress>();
     Workspace _workspace;
     Resource _content;
     MimeMessage message;
     int _references = 0;
 
-    public List getToAddresses() {
+    public List<MailAddress> getToAddresses() {
         return toAddresses;
     }
 
@@ -86,7 +86,7 @@ public class MovingMessage {
         toAddresses.remove(s);
     }
 
-    public Iterator getRecipientIterator() {
+    public Iterator<MailAddress> getRecipientIterator() {
 
         return toAddresses.iterator();
     }

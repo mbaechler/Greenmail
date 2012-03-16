@@ -29,24 +29,24 @@ public class UidlCommand
         try {
             MailFolder inbox = state.getFolder();
             String[] cmdLine = cmd.split(" ");
-            List messages;
+            List<SimpleStoredMessage> messages;
             if (cmdLine.length > 1) {
                 String msgNumStr = cmdLine[1];
-                List msgList = inbox.getMessages(new MsgRangeFilter(msgNumStr, false));
+                List<SimpleStoredMessage> msgList = inbox.getMessages(new MsgRangeFilter(msgNumStr, false));
                 if (msgList.size() != 1) {
                     conn.println("-ERR no such message");
 
                     return;
                 }
 
-                SimpleStoredMessage msg = (SimpleStoredMessage) msgList.get(0);
+                SimpleStoredMessage msg = msgList.get(0);
                 conn.println("+OK " + msgNumStr + " " + msg.getUid());
             } else {
                 messages = inbox.getNonDeletedMessages();
 
                 conn.println("+OK");
-                for (Iterator i = messages.iterator(); i.hasNext();) {
-                    SimpleStoredMessage msg = (SimpleStoredMessage) i.next();
+                for (Iterator<SimpleStoredMessage> i = messages.iterator(); i.hasNext();) {
+                    SimpleStoredMessage msg = i.next();
                     conn.println(inbox.getMsn(msg.getUid()) + " " + msg.getUid());
                 }
 

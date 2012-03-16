@@ -27,7 +27,7 @@ class ListCommand extends AuthenticatedStateCommand {
     public static final String NAME = "LIST";
     public static final String ARGS = "<reference-name> <mailbox-name-with-wildcards>";
 
-    private ListCommandParser parser = new ListCommandParser();
+    private ListCommandParser listCommandParser = new ListCommandParser();
 
     /**
      * @see CommandTemplate#doProcess
@@ -36,14 +36,14 @@ class ListCommand extends AuthenticatedStateCommand {
                              ImapResponse response,
                              ImapSession session)
             throws ProtocolException, FolderException {
-        String referenceName = parser.mailbox(request);
-        String mailboxPattern = parser.listMailbox(request);
-        parser.endLine(request);
+        String referenceName = listCommandParser.mailbox(request);
+        String mailboxPattern = listCommandParser.listMailbox(request);
+        listCommandParser.endLine(request);
 
         // Should the #user.userName section be removed from names returned?
         boolean removeUserPrefix;
 
-        Collection mailboxes;
+        Collection<MailFolder> mailboxes;
         if (mailboxPattern.length() == 0) {
             // An empty mailboxPattern signifies a request for the hierarchy delimiter
             // and root name of the referenceName argument
@@ -74,7 +74,7 @@ class ListCommand extends AuthenticatedStateCommand {
                 removeUserPrefix = true;
             }
 
-            mailboxes = new ArrayList(1);
+            mailboxes = new ArrayList<MailFolder>(1);
             mailboxes.add(referenceFolder);
         } else {
             String searchPattern;
@@ -97,9 +97,9 @@ class ListCommand extends AuthenticatedStateCommand {
                 session.getUser().getQualifiedMailboxName();
         int prefixLength = personalNamespace.length();
 
-        Iterator iterator = mailboxes.iterator();
+        Iterator<MailFolder> iterator = mailboxes.iterator();
         while (iterator.hasNext()) {
-            MailFolder folder = (MailFolder) iterator.next();
+            MailFolder folder = iterator.next();
             StringBuffer message = new StringBuffer("(");
             if (!folder.isSelectable()) {
                 message.append("\\Noselect");
@@ -131,7 +131,7 @@ class ListCommand extends AuthenticatedStateCommand {
         response.commandComplete(this);
     }
 
-    protected Collection doList(ImapSession session, String searchPattern) throws FolderException {
+    protected Collection<MailFolder> doList(ImapSession session, String searchPattern) throws FolderException {
         return session.getHost().listMailboxes(session.getUser(), searchPattern);
     }
 
@@ -170,7 +170,6 @@ class ListCommand extends AuthenticatedStateCommand {
     }
 
     private class ListCommandParser extends CommandParser {
-        private final char[] WILDCARD_CHARS = new char[]{'*', '%'};
 
         /**
          * Reads an argument of type "list_mailbox" from the request, which is

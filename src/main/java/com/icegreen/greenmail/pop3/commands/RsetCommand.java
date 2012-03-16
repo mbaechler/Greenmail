@@ -43,10 +43,10 @@ public class RsetCommand extends Pop3Command {
         conn.println("+OK");
         try {
             MailFolder inbox = state.getFolder();
-            List msgList = inbox.getMessages();
+            List<SimpleStoredMessage> msgList = inbox.getMessages();
             int count = 0;
             for(int i=0;i<msgList.size();i++) {
-                SimpleStoredMessage msg = (SimpleStoredMessage) msgList.get(i);
+                SimpleStoredMessage msg = msgList.get(i);
                 Flags flags = msg.getFlags();
                 if (flags.contains(Flags.Flag.DELETED)) {
                     count++;

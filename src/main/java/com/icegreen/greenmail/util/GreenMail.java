@@ -25,7 +25,7 @@ import java.util.*;
  */
 public class GreenMail {
     Managers managers;
-    HashMap services;
+    HashMap<String, Service> services;
 
     /**
      * Creates a SMTP, SMTPS, POP3, POP3S, IMAP, and IMAPS server binding onto non-default ports.
@@ -49,7 +49,7 @@ public class GreenMail {
      */
     public GreenMail(ServerSetup[] config) {
         managers = new Managers();
-        services = new HashMap();
+        services = new HashMap<String, Service>();
         for (int i = 0; i < config.length; i++) {
             ServerSetup setup = config[i];
             if (services.containsKey(setup.getProtocol())) {
@@ -68,22 +68,23 @@ public class GreenMail {
 
 
     public synchronized void start() {
-        for (Iterator it = services.values().iterator(); it.hasNext();) {
-            Service service = (Service) it.next();
-            service.startService(null);
+        for (Iterator<Service> it = services.values().iterator(); it.hasNext();) {
+            Service service = it.next();
+            service.startService();
         }
         //quick hack for now, will change eventually
         boolean allup = false;
         for (int i=0;i<200 && !allup;i++) {
             allup = true;
-            for (Iterator it = services.values().iterator(); it.hasNext();) {
-                Service service = (Service) it.next();
+            for (Iterator<Service> it = services.values().iterator(); it.hasNext();) {
+                Service service = it.next();
                 allup = allup && service.isRunning();
             }
             if (!allup) {
                 try {
                     Thread.sleep(5);
                 } catch (InterruptedException e) {
+                	e.printStackTrace();
                 }
             }
         }
@@ -93,9 +94,9 @@ public class GreenMail {
     }
 
     public synchronized void stop() {
-        for (Iterator it = services.values().iterator(); it.hasNext();) {
-            Service service = (Service) it.next();
-            service.stopService(null);
+        for (Iterator<Service> it = services.values().iterator(); it.hasNext();) {
+            Service service = it.next();
+            service.stopService();
         }
     }
 
@@ -175,10 +176,10 @@ public class GreenMail {
      * {@link GreenMailUtil} has a bunch of static helper methods to extract body text etc.
      */
     public MimeMessage[] getReceivedMessages() {
-        List msgs = managers.getImapHostManager().getAllMessages();
+        List<SimpleStoredMessage> msgs = managers.getImapHostManager().getAllMessages();
         MimeMessage[] ret = new MimeMessage[msgs.size()];
         for (int i = 0; i < msgs.size(); i++) {
-            SimpleStoredMessage simpleStoredMessage = (SimpleStoredMessage) msgs.get(i);
+            SimpleStoredMessage simpleStoredMessage = msgs.get(i);
             ret[i] = simpleStoredMessage.getMimeMessage();
         }
         return ret;
@@ -189,11 +190,11 @@ public class GreenMail {
      * @param domain returns all receved messages arrived to domain.
      */
     public MimeMessage[] getReceviedMessagesForDomain(String domain) {
-        List msgs = managers.getImapHostManager().getAllMessages();
-        List ret = new ArrayList();
+        List<SimpleStoredMessage> msgs = managers.getImapHostManager().getAllMessages();
+        List<MimeMessage> ret = new ArrayList<MimeMessage>();
         try {
             for (int i = 0; i < msgs.size(); i++) {
-                SimpleStoredMessage simpleStoredMessage = (SimpleStoredMessage) msgs.get(i);
+                SimpleStoredMessage simpleStoredMessage = msgs.get(i);
                 String tos = GreenMailUtil.getAddressList(simpleStoredMessage.getMimeMessage().getAllRecipients());
                 if (tos.toLowerCase().indexOf(domain) >= 0) {
                     ret.add(simpleStoredMessage.getMimeMessage());
@@ -202,7 +203,7 @@ public class GreenMail {
         } catch (MessagingException e) {
             throw new RuntimeException(e);
         }
-        return (MimeMessage[]) ret.toArray(new MimeMessage[ret.size()]);
+        return ret.toArray(new MimeMessage[0]);
     }
     /**
      * Sets the password for the account linked to email. If no account exits, one is automatically created when an email is received
@@ -235,7 +236,7 @@ public class GreenMail {
      * @param users
      */
     public void setUsers(Properties users) {
-        for (Iterator it = users.keySet().iterator(); it.hasNext();) {
+        for (Iterator<Object> it = users.keySet().iterator(); it.hasNext();) {
             String email = (String) it.next();
             String password = users.getProperty(email);
             setUser(email, email, password);

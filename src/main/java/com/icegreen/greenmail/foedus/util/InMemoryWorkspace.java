@@ -16,6 +16,8 @@ public class InMemoryWorkspace
         return new StringBufferResource();
     }
 
+    @Override
     public void release(Resource tmpFile) {
+    	//implementation required but no code needed
     }
 }

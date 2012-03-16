@@ -31,7 +31,7 @@ class AppendCommand extends AuthenticatedStateCommand {
     public static final String NAME = "APPEND";
     public static final String ARGS = "<mailbox> [<flag_list>] [<date_time>] literal";
 
-    private AppendCommandParser parser = new AppendCommandParser();
+    private AppendCommandParser appendCommandParser = new AppendCommandParser();
 
     /**
      * @see CommandTemplate#doProcess
@@ -40,17 +40,17 @@ class AppendCommand extends AuthenticatedStateCommand {
                              ImapResponse response,
                              ImapSession session)
             throws ProtocolException, FolderException {
-        String mailboxName = parser.mailbox(request);
-        Flags flags = parser.optionalAppendFlags(request);
+        String mailboxName = appendCommandParser.mailbox(request);
+        Flags flags = appendCommandParser.optionalAppendFlags(request);
         if (flags == null) {
             flags = new Flags();
         }
-        Date datetime = parser.optionalDateTime(request);
+        Date datetime = appendCommandParser.optionalDateTime(request);
         if (datetime == null) {
             datetime = new Date();
         }
-        MimeMessage message = parser.mimeMessage(request);
-        parser.endLine(request);
+        MimeMessage message = appendCommandParser.mimeMessage(request);
+        appendCommandParser.endLine(request);
 
         MailFolder folder = null;
         try {

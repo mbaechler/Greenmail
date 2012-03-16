@@ -38,7 +38,7 @@ public class MailCommand
 
                 MailAddress fromAddr = new MailAddress(from);
 
-                String err = manager.checkSender(state, fromAddr);
+                String err = manager.checkSender();
                 if (err != null) {
                     conn.println(err);
 

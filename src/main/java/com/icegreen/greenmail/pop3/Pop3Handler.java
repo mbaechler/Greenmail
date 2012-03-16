@@ -11,7 +11,6 @@ import com.icegreen.greenmail.pop3.commands.Pop3CommandRegistry;
 import com.icegreen.greenmail.user.UserManager;
 
 import java.io.IOException;
-import java.net.ProtocolException;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.StringTokenizer;
@@ -51,10 +50,12 @@ public class Pop3Handler extends Thread {
             _conn.println("421 Service shutting down and closing transmission channel");
 
         } catch (Exception e) {
+        	e.printStackTrace();
         } finally {
             try {
                 _socket.close();
             } catch (IOException ioe) {
+            	ioe.printStackTrace();
             }
         }
 

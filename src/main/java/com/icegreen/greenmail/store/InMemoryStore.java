@@ -6,16 +6,23 @@
  */
 package com.icegreen.greenmail.store;
 
-import com.icegreen.greenmail.mail.MovingMessage;
-import com.icegreen.greenmail.foedus.util.MsgRangeFilter;
-import com.icegreen.greenmail.imap.ImapConstants;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.StringTokenizer;
 
 import javax.mail.Flags;
 import javax.mail.MessagingException;
-import javax.mail.Message;
 import javax.mail.internet.MimeMessage;
 import javax.mail.search.SearchTerm;
-import java.util.*;
+
+import com.icegreen.greenmail.foedus.util.MsgRangeFilter;
+import com.icegreen.greenmail.imap.ImapConstants;
+import com.icegreen.greenmail.mail.MovingMessage;
 
 /**
  * A simple in-memory implementation of {@link Store}, used for testing
@@ -92,8 +99,8 @@ public class InMemoryStore
         toRename.setName(newName);
     }
 
-    public Collection getChildren(MailFolder parent) {
-        Collection children = ((HierarchicalFolder) parent).getChildren();
+    public Collection<HierarchicalFolder> getChildren(MailFolder parent) {
+        Collection<HierarchicalFolder> children = ((HierarchicalFolder) parent).getChildren();
         return Collections.unmodifiableCollection(children);
     }
 
@@ -105,7 +112,7 @@ public class InMemoryStore
     /**
      * @see com.icegreen.greenmail.store.Store#listMailboxes
      */
-    public Collection listMailboxes(String searchPattern)
+    public Collection<MailFolder> listMailboxes(String searchPattern)
             throws FolderException {
         int starIndex = searchPattern.indexOf('*');
         int percentIndex = searchPattern.indexOf('%');
@@ -116,7 +123,7 @@ public class InMemoryStore
             throw new FolderException("WIldcard characters are only handled as the last character of a list argument.");
         }
 
-        ArrayList mailboxes = new ArrayList();
+        ArrayList<MailFolder> mailboxes = new ArrayList<MailFolder>();
         if (starIndex != -1 || percentIndex != -1) {
             int lastDot = searchPattern.lastIndexOf(HIERARCHY_DELIMITER);
             String parentName;
@@ -131,9 +138,9 @@ public class InMemoryStore
             // If the parent from the search pattern doesn't exist,
             // return empty.
             if (parent != null) {
-                Iterator children = parent.getChildren().iterator();
+                Iterator<HierarchicalFolder> children = parent.getChildren().iterator();
                 while (children.hasNext()) {
-                    HierarchicalFolder child = (HierarchicalFolder) children.next();
+                    HierarchicalFolder child = children.next();
                     if (child.getName().startsWith(matchPattern)) {
                         mailboxes.add(child);
 
@@ -154,11 +161,11 @@ public class InMemoryStore
         return mailboxes;
     }
 
-    private void addAllChildren(HierarchicalFolder mailbox, Collection mailboxes) {
-        Collection children = mailbox.getChildren();
-        Iterator iterator = children.iterator();
+    private void addAllChildren(HierarchicalFolder mailbox, Collection<MailFolder> mailboxes) {
+        Collection<HierarchicalFolder> children = mailbox.getChildren();
+        Iterator<HierarchicalFolder> iterator = children.iterator();
         while (iterator.hasNext()) {
-            HierarchicalFolder child = (HierarchicalFolder) iterator.next();
+            HierarchicalFolder child = iterator.next();
             mailboxes.add(child);
             addAllChildren(child, mailboxes);
         }
@@ -175,27 +182,27 @@ public class InMemoryStore
     }
 
     private class HierarchicalFolder implements MailFolder {
-        private Collection children;
+        private Collection<HierarchicalFolder> children;
         private HierarchicalFolder parent;
 
         protected String name;
         private boolean isSelectable = false;
 
-        private List mailMessages = Collections.synchronizedList(new LinkedList());
+        private List<SimpleStoredMessage> mailMessages = Collections.synchronizedList(new LinkedList<SimpleStoredMessage>());
         private long nextUid = 1;
         private long uidValidity;
 
-        private List _mailboxListeners = Collections.synchronizedList(new LinkedList());
+        private List<FolderListener> _mailboxListeners = Collections.synchronizedList(new LinkedList<FolderListener>());
 
         public HierarchicalFolder(HierarchicalFolder parent,
                                   String name) {
             this.name = name;
-            this.children = new ArrayList();
+            this.children = new ArrayList<HierarchicalFolder>();
             this.parent = parent;
             this.uidValidity = System.currentTimeMillis();
         }
 
-        public Collection getChildren() {
+        public Collection<HierarchicalFolder> getChildren() {
             return children;
         }
 
@@ -204,9 +211,9 @@ public class InMemoryStore
         }
 
         public HierarchicalFolder getChild(String name) {
-            Iterator iterator = children.iterator();
+            Iterator<HierarchicalFolder> iterator = children.iterator();
             while (iterator.hasNext()) {
-                HierarchicalFolder child = (HierarchicalFolder) iterator.next();
+                HierarchicalFolder child = iterator.next();
                 if (child.getName().equalsIgnoreCase(name)) {
                     return child;
                 }
@@ -245,7 +252,7 @@ public class InMemoryStore
         public int getUnseenCount() {
             int count = 0;
             for (int i = 0; i < mailMessages.size(); i++) {
-                SimpleStoredMessage message = (SimpleStoredMessage) mailMessages.get(i);
+                SimpleStoredMessage message = mailMessages.get(i);
                 if (!message.getFlags().contains(Flags.Flag.SEEN)) {
                     count++;
                 }
@@ -260,7 +267,7 @@ public class InMemoryStore
          */
         public int getFirstUnseen() {
             for (int i = 0; i < mailMessages.size(); i++) {
-                SimpleStoredMessage message = (SimpleStoredMessage) mailMessages.get(i);
+                SimpleStoredMessage message = mailMessages.get(i);
                 if (!message.getFlags().contains(Flags.Flag.SEEN)) {
                     return i + 1;
                 }
@@ -271,7 +278,7 @@ public class InMemoryStore
         public int getRecentCount(boolean reset) {
             int count = 0;
             for (int i = 0; i < mailMessages.size(); i++) {
-                SimpleStoredMessage message = (SimpleStoredMessage) mailMessages.get(i);
+                SimpleStoredMessage message = mailMessages.get(i);
                 if (message.getFlags().contains(Flags.Flag.RECENT)) {
                     count++;
                     if (reset) {
@@ -284,7 +291,7 @@ public class InMemoryStore
 
         public int getMsn(long uid) throws FolderException {
             for (int i = 0; i < mailMessages.size(); i++) {
-                SimpleStoredMessage message = (SimpleStoredMessage) mailMessages.get(i);
+                SimpleStoredMessage message = mailMessages.get(i);
                 if (message.getUid() == uid) {
                     return i + 1;
                 }
@@ -296,15 +303,15 @@ public class InMemoryStore
             // Notify all the listeners of the new message
             synchronized (_mailboxListeners) {
                 for (int j = 0; j < _mailboxListeners.size(); j++) {
-                    FolderListener listener = (FolderListener) _mailboxListeners.get(j);
+                    FolderListener listener = _mailboxListeners.get(j);
                     listener.mailboxDeleted();
                 }
             }
 
         }
 
-        public List getMessages(MsgRangeFilter range) {
-            List ret = new ArrayList();
+        public List<SimpleStoredMessage> getMessages(MsgRangeFilter range) {
+            List<SimpleStoredMessage> ret = new ArrayList<SimpleStoredMessage>();
             for (int i = 0; i < mailMessages.size(); i++) {
                 if (range.includes(i+1)) {
                     ret.add(mailMessages.get(i));
@@ -314,14 +321,15 @@ public class InMemoryStore
             return ret;
         }
 
-        public List getMessages() {
+        @Override
+        public List<SimpleStoredMessage> getMessages() {
             return mailMessages;
         }
 
-        public List getNonDeletedMessages() {
-            List ret = new ArrayList();
+        public List<SimpleStoredMessage> getNonDeletedMessages() {
+            List<SimpleStoredMessage> ret = new ArrayList<SimpleStoredMessage>();
             for (int i = 0; i < mailMessages.size(); i++) {
-                SimpleStoredMessage message = (SimpleStoredMessage) mailMessages.get(i);
+                SimpleStoredMessage message = mailMessages.get(i);
                 if (!message.getFlags().contains(Flags.Flag.DELETED)) {
                     ret.add(message);
                 }
@@ -354,7 +362,7 @@ public class InMemoryStore
             // Notify all the listeners of the new message
             synchronized (_mailboxListeners) {
                 for (int j = 0; j < _mailboxListeners.size(); j++) {
-                    FolderListener listener = (FolderListener) _mailboxListeners.get(j);
+                    FolderListener listener = _mailboxListeners.get(j);
                     listener.added(newMsn);
                 }
             }
@@ -364,7 +372,7 @@ public class InMemoryStore
 
         public void setFlags(Flags flags, boolean value, long uid, FolderListener silentListener, boolean addUid) throws FolderException {
             int msn = getMsn(uid);
-            SimpleStoredMessage message = (SimpleStoredMessage) mailMessages.get(msn - 1);
+            SimpleStoredMessage message = mailMessages.get(msn - 1);
 
             if (value) {
                 message.getFlags().add(flags);
@@ -381,7 +389,7 @@ public class InMemoryStore
 
         public void replaceFlags(Flags flags, long uid, FolderListener silentListener, boolean addUid) throws FolderException {
             int msn = getMsn(uid);
-            SimpleStoredMessage message = (SimpleStoredMessage) mailMessages.get(msn - 1);
+            SimpleStoredMessage message = mailMessages.get(msn - 1);
             message.getFlags().remove(MessageFlags.ALL_FLAGS);
             message.getFlags().add(flags);
 
@@ -395,7 +403,7 @@ public class InMemoryStore
         private void notifyFlagUpdate(int msn, Flags flags, Long uidNotification, FolderListener silentListener) {
             synchronized (_mailboxListeners) {
                 for (int i = 0; i < _mailboxListeners.size(); i++) {
-                    FolderListener listener = (FolderListener) _mailboxListeners.get(i);
+                    FolderListener listener = _mailboxListeners.get(i);
 
                     if (listener == silentListener) {
                         continue;
@@ -423,7 +431,7 @@ public class InMemoryStore
 
         public SimpleStoredMessage getMessage(long uid) {
             for (int i = 0; i < mailMessages.size(); i++) {
-                SimpleStoredMessage message = (SimpleStoredMessage) mailMessages.get(i);
+                SimpleStoredMessage message = mailMessages.get(i);
                 if (message.getUid() == uid) {
                     return message;
                 }
@@ -434,7 +442,7 @@ public class InMemoryStore
         public long[] getMessageUids() {
             long[] uids = new long[mailMessages.size()];
             for (int i = 0; i < mailMessages.size(); i++) {
-                SimpleStoredMessage message = (SimpleStoredMessage) mailMessages.get(i);
+                SimpleStoredMessage message = mailMessages.get(i);
                 uids[i] = message.getUid();
             }
             return uids;
@@ -445,10 +453,10 @@ public class InMemoryStore
         }
 
         public long[] search(SearchTerm searchTerm) {
-            ArrayList matchedMessages = new ArrayList();
+            ArrayList<SimpleStoredMessage> matchedMessages = new ArrayList<SimpleStoredMessage>();
 
             for (int i = 0; i < mailMessages.size(); i++) {
-                SimpleStoredMessage message = (SimpleStoredMessage) mailMessages.get(i);
+                SimpleStoredMessage message = mailMessages.get(i);
                 if (searchTerm.match(message.getMimeMessage())) {
                     matchedMessages.add(message);
                 }
@@ -456,7 +464,7 @@ public class InMemoryStore
 
             long[] matchedUids = new long[matchedMessages.size()];
             for (int i = 0; i < matchedUids.length; i++) {
-                SimpleStoredMessage storedMessage = (SimpleStoredMessage) matchedMessages.get(i);
+                SimpleStoredMessage storedMessage = matchedMessages.get(i);
                 long uid = storedMessage.getUid();
                 matchedUids[i] = uid;
             }
@@ -482,7 +490,7 @@ public class InMemoryStore
 
         public void expunge() throws FolderException {
             for (int i = 0; i < mailMessages.size(); i++) {
-                SimpleStoredMessage message = (SimpleStoredMessage) mailMessages.get(i);
+                SimpleStoredMessage message = mailMessages.get(i);
                 if (message.getFlags().contains(Flags.Flag.DELETED)) {
                     expungeMessage(i + 1);
                 }
@@ -494,7 +502,7 @@ public class InMemoryStore
             synchronized (_mailboxListeners) {
                 deleteMessage(msn);
                 for (int j = 0; j < _mailboxListeners.size(); j++) {
-                    FolderListener expungeListener = (FolderListener) _mailboxListeners.get(j);
+                    FolderListener expungeListener = _mailboxListeners.get(j);
                     expungeListener.expunged(msn);
                 }
             }

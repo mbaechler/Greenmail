@@ -51,7 +51,6 @@ public class SimpleMessageAttributes
     private final static String Q = "\"";
     private final static String LB = "(";
     private final static String RB = ")";
-    private final static boolean DEBUG = false;
     private final static String MULTIPART = "MULTIPART";
     private final static String MESSAGE = "MESSAGE";
 
@@ -59,12 +58,9 @@ public class SimpleMessageAttributes
     private int messageSequenceNumber;
     private Date internalDate;
     private String internalDateString;
-    private String bodyStructure;
-    private String envelope;
     private int size;
     private int lineCount;
     public MailMessageAttributes[] parts;
-    private List headers;
 
     //rfc822 or MIME header fields
     //arrays only if multiple values allowed under rfc822
@@ -76,12 +72,10 @@ public class SimpleMessageAttributes
     private String[] cc;
     private String[] bcc;
     private String[] inReplyTo;
-    private String[] date;
     private String[] messageID;
-    private String contentType;
     private String primaryType = null;   // parsed from contentType
     private String secondaryType = null; // parsed from contentType
-    private Set parameters;      // parsed from contentType
+    private Set<String> parameters;      // parsed from contentType
     private String contentID = null;
     private String contentDesc = null;
     private String contentEncoding = null;
@@ -91,7 +85,7 @@ public class SimpleMessageAttributes
     SimpleMessageAttributes() {
     }
 
-    void setAttributesFor(MimeMessage msg) throws MessagingException {
+    void setAttributesFor(MimeMessage msg) {
         try {
             internalDate = msg.getSentDate();
         } catch (MessagingException me) {
@@ -104,8 +98,6 @@ public class SimpleMessageAttributes
         internalDateString = new SimpleDateFormat("dd-MMM-yyyy hh:mm:ss Z").format(internalDate);
         interalDateEnvelopeString = new MailDateFormat().format(internalDate);
         parseMimePart(msg);
-        envelope = null;
-        bodyStructure = null;
     }
 
     void setUID(int thisUID) {
@@ -116,7 +108,7 @@ public class SimpleMessageAttributes
      * Parses key data items from a MimeMessage for seperate storage.
      * TODO this is a mess, and should be completely revamped.
      */
-    void parseMimePart(MimePart part) throws MessagingException {
+    void parseMimePart(MimePart part) {
         size = GreenMailUtil.getBody(part).length();
 
         // Section 1 - Message Headers
@@ -163,11 +155,6 @@ public class SimpleMessageAttributes
 //            if (DEBUG) getLogger().debug("Messaging Exception for getHeader(In Reply To): " + me);
         }
         try {
-            date = part.getHeader("Date");
-        } catch (MessagingException me) {
-//            if (DEBUG) getLogger().debug("Messaging Exception for getHeader(Date): " + me);
-        }
-        try {
             messageID = part.getHeader("Message-ID");
         } catch (MessagingException me) {
 //            if (DEBUG) getLogger().debug("Messaging Exception for getHeader(messageID): " + me);
@@ -211,9 +198,6 @@ public class SimpleMessageAttributes
         try {
             // TODO this doesn't work
             lineCount = getLineCount(part);
-        } catch (MessagingException me) {
-            me.printStackTrace();
-//            if (DEBUG) getLogger().debug("Messaging Exception for getLineCount(): " + me);
         } catch (Exception e) {
             e.printStackTrace();
 //            if (DEBUG) getLogger().debug("Exception for getLineCount(): " + e);
@@ -233,8 +217,6 @@ public class SimpleMessageAttributes
                         SimpleMessageAttributes partAttrs = new SimpleMessageAttributes();
                         partAttrs.parseMimePart((MimePart) nextPart);
                         parts[i] = partAttrs;
-
-                    } else {
                     }
                 }
             } catch (Exception e) {
@@ -270,7 +252,7 @@ public class SimpleMessageAttributes
         }
     }
 
-    private int getLineCount(MimePart part) throws MessagingException {
+    private int getLineCount(MimePart part) {
         return GreenMailUtil.getLineCount(GreenMailUtil.getBody(part));
     }
 
@@ -278,7 +260,7 @@ public class SimpleMessageAttributes
      * Builds IMAP envelope String from pre-parsed data.
      */
     String parseEnvelope() {
-        List response = new ArrayList();
+        List<String> response = new ArrayList<String>();
         //1. Date ---------------
         response.add(LB + Q + interalDateEnvelopeString + Q + SP);
         //2. Subject ---------------
@@ -303,7 +285,7 @@ public class SimpleMessageAttributes
 //            if (DEBUG) getLogger().debug("parsingEnvelope - sender[0] is: " + sender[0]);
             //Check for Netscape feature - sender is local part only
             if (sender[0].indexOf("@") == -1) {
-                response.add(LB + (String) response.get(3) + RB); //first From address
+                response.add(LB + response.get(3) + RB); //first From address
             } else {
                 response.add(LB);
                 for (int i = 0; i < sender.length; i++) {
@@ -313,7 +295,7 @@ public class SimpleMessageAttributes
             }
         } else {
             if (from != null && from.length > 0) {
-                response.add(LB + (String) response.get(3) + RB); //first From address
+                response.add(LB + response.get(3) + RB); //first From address
             } else {
                 response.add(NIL);
             }
@@ -321,7 +303,7 @@ public class SimpleMessageAttributes
         response.add(SP);
         if (replyTo != null && replyTo.length > 0) {
             if (replyTo[0].indexOf("@") == -1) {
-                response.add(LB + (String) response.get(3) + RB); //first From address
+                response.add(LB + response.get(3) + RB); //first From address
             } else {
                 response.add(LB);
                 for (int i = 0; i < replyTo.length; i++) {
@@ -331,7 +313,7 @@ public class SimpleMessageAttributes
             }
         } else {
             if (from != null && from.length > 0) {
-                response.add(LB + (String) response.get(3) + RB); //first From address
+                response.add(LB + response.get(3) + RB); //first From address
             } else {
                 response.add(NIL);
             }
@@ -382,7 +364,7 @@ public class SimpleMessageAttributes
 
         StringBuffer buf = new StringBuffer(16 * response.size());
         for (int j = 0; j < response.size(); j++) {
-            buf.append((String) response.get(j));
+            buf.append(response.get(j));
         }
 
         return buf.toString();
@@ -482,9 +464,9 @@ public class SimpleMessageAttributes
             buf.append(NIL);
         } else {
             buf.append(LB);
-            Iterator it = parameters.iterator();
+            Iterator<String> it = parameters.iterator();
             while (it.hasNext()) {
-                buf.append((String) it.next());
+                buf.append(it.next());
             }
             buf.append(RB);
         }
@@ -682,13 +664,13 @@ public class SimpleMessageAttributes
     //~ inner class
     private static class Header {
         String value;
-        Set params = null;
+        Set<String> params = null;
 
         public Header(String line) {
             String[] strs = line.split(";");
             value = strs[0];
             if (0 != strs.length) {
-                params = new HashSet();
+                params = new HashSet<String>();
                 for (int i = 1; i < strs.length; i++) {
                     String p = strs[i].trim();
                     int e = p.indexOf("=");
@@ -700,7 +682,7 @@ public class SimpleMessageAttributes
             }
         }
 
-        public Set getParams() {
+        public Set<String> getParams() {
             return params;
         }
 
@@ -717,11 +699,11 @@ public class SimpleMessageAttributes
                 ret.append(Q + value + Q + SP);
                 ret.append(LB);
                 int i = 0;
-                for (Iterator iterator = params.iterator(); iterator.hasNext();) {
+                for (Iterator<String> iterator = params.iterator(); iterator.hasNext();) {
                     if (i++ > 0) {
                         ret.append(SP);
                     }
-                    String s = (String) iterator.next();
+                    String s = iterator.next();
                     ret.append(s);
                 }
                 ret.append(RB);

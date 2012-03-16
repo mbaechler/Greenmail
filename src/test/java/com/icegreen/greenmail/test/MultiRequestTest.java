@@ -5,31 +5,39 @@
 */
 package com.icegreen.greenmail.test;
 
-import junit.framework.TestCase;
-import com.icegreen.greenmail.util.GreenMail;
-import com.icegreen.greenmail.util.GreenMailUtil;
-import com.icegreen.greenmail.util.ServerSetupTest;
-import com.icegreen.greenmail.util.Retriever;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+
+import org.junit.After;
+import org.junit.Ignore;
+import org.junit.Test;
+
+import com.icegreen.greenmail.util.GreenMail;
+import com.icegreen.greenmail.util.GreenMailUtil;
+import com.icegreen.greenmail.util.Retriever;
+import com.icegreen.greenmail.util.ServerSetupTest;
 
 /**
  * @author Wael Chatila
  * @version $Id: $
  * @since Jan 11, 2007
  */
-public class MultiRequestTest extends TestCase {
+@Ignore
+public class MultiRequestTest {
     GreenMail greenMail;
 
-    protected void tearDown() throws Exception {
+    @After
+    protected void tearDown() {
         try {
             greenMail.stop();
         } catch (NullPointerException ignored) {
             //empty
         }
-        super.tearDown();
     }
 
     //~ INNER CLASSES -----------------------------------------------
@@ -73,6 +81,7 @@ public class MultiRequestTest extends TestCase {
     }
     //~ END INNER CLASSES -----------------------------------------------
 
+    @Test
     public void test40Senders() throws InterruptedException {
         greenMail = new GreenMail(ServerSetupTest.SMTP);
         greenMail.start();
@@ -90,6 +99,7 @@ public class MultiRequestTest extends TestCase {
         assertFalse(greenMail.waitForIncomingEmail(15000,tot+1));
     }
 
+    @Test
     public void test40Senders20x4Retrievers() throws InterruptedException {
         greenMail = new GreenMail();
         greenMail.start();
@@ -140,6 +150,7 @@ public class MultiRequestTest extends TestCase {
 
     }
 
+    @Test
     public void test40Senders20x4RetrieversAtTheSameTime() throws InterruptedException {
         greenMail = new GreenMail();
         greenMail.start();

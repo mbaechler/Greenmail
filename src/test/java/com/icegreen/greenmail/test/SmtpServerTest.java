@@ -11,6 +11,10 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+
+import org.junit.After;
+import org.junit.Test;
+
 import java.io.ByteArrayOutputStream;
 
 /**
@@ -22,15 +26,16 @@ public class SmtpServerTest extends TestCase {
 
     GreenMail greenMail;
 
-    protected void tearDown() throws Exception {
+    @After
+    protected void tearDown() {
         try {
             greenMail.stop();
         } catch (NullPointerException ignored) {
             //empty
         }
-        super.tearDown();
     }
 
+    @Test
     public void testSmtpServerBasic() throws MessagingException {
         greenMail = new GreenMail(ServerSetupTest.SMTP);
         greenMail.start();
@@ -41,6 +46,7 @@ public class SmtpServerTest extends TestCase {
         assertEquals("body", GreenMailUtil.getBody(emails[0]));
     }
 
+    @Test
     public void testSmtpServerTimeout() throws Throwable {
         greenMail = new GreenMail(ServerSetupTest.SMTP);
         greenMail.start();
@@ -52,11 +58,13 @@ public class SmtpServerTest extends TestCase {
         assertEquals(0, emails.length);
     }
 
+    @Test
     public void testSmtpServerReceiveWithSetup() throws Throwable {
         greenMail = new GreenMail(ServerSetupTest.SMTP);
         runSmtpServerReceive();
     }
 
+    @Test
     public void runSmtpServerReceive() throws Throwable {
         greenMail.start();
         assertEquals(0, greenMail.getReceivedMessages().length);
@@ -71,6 +79,7 @@ public class SmtpServerTest extends TestCase {
         assertEquals(body, GreenMailUtil.getBody(emails[0]).trim());
     }
 
+    @Test
     public void testSmtpsServerReceive() throws Throwable {
         greenMail = new GreenMail(ServerSetupTest.SMTPS);
         greenMail.start();
@@ -86,6 +95,7 @@ public class SmtpServerTest extends TestCase {
         assertEquals(body, GreenMailUtil.getBody(emails[0]).trim());
     }
 
+    @Test
     public void testSmtpServerReceiveInThread() throws Throwable {
         greenMail = new GreenMail(ServerSetupTest.SMTP);
         greenMail.start();
@@ -108,6 +118,7 @@ public class SmtpServerTest extends TestCase {
         sendThread.join(10000);
     }
 
+    @Test
     public void testSmtpServerReceiveMultipart() throws Exception {
         greenMail = new GreenMail(ServerSetupTest.SMTP);
         greenMail.start();

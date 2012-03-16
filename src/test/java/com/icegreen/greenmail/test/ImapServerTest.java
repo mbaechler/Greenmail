@@ -3,32 +3,44 @@
  */
 package com.icegreen.greenmail.test;
 
-import com.icegreen.greenmail.util.*;
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import java.io.ByteArrayOutputStream;
 
 import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.internet.MimeMultipart;
-import java.io.ByteArrayOutputStream;
+
+import org.junit.After;
+import org.junit.Test;
+
+import com.icegreen.greenmail.util.GreenMail;
+import com.icegreen.greenmail.util.GreenMailUtil;
+import com.icegreen.greenmail.util.Retriever;
+import com.icegreen.greenmail.util.ServerSetupTest;
 
 /**
  * @author Wael Chatila
  * @version $Id: $
  * @since Jan 28, 2006
  */
-public class ImapServerTest extends TestCase {
+public class ImapServerTest {
 
     GreenMail greenMail;
 
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() {
         try {
             greenMail.stop();
         } catch (NullPointerException ignored) {
             //empty
         }
-        super.tearDown();
     }
 
+    @Test
     public void testRetreiveSimple() throws Exception {
         greenMail = new GreenMail(ServerSetupTest.SMTP_IMAP);
         assertNotNull(greenMail.getImap());
@@ -46,6 +58,7 @@ public class ImapServerTest extends TestCase {
         assertEquals(body, ((String) messages[0].getContent()).trim());
     }
 
+    @Test
     public void testImapsReceive() throws Throwable {
         greenMail = new GreenMail(ServerSetupTest.SMTPS_IMAPS);
         assertNull(greenMail.getImap());
@@ -64,6 +77,7 @@ public class ImapServerTest extends TestCase {
         assertEquals(body, ((String) messages[0].getContent()).trim());
     }
 
+    @Test
     public void testRetreiveSimpleWithNonDefaultPassword() throws Exception {
         greenMail = new GreenMail(ServerSetupTest.SMTP_IMAP);
         assertNotNull(greenMail.getImap());
@@ -91,6 +105,7 @@ public class ImapServerTest extends TestCase {
         assertEquals(body, ((String) messages[0].getContent()).trim());
     }
 
+    @Test
     public void testRetriveMultipart() throws Exception {
         greenMail = new GreenMail(ServerSetupTest.SMTP_IMAP);
         assertNotNull(greenMail.getImap());

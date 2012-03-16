@@ -3,32 +3,45 @@
  */
 package com.icegreen.greenmail.test;
 
-import com.icegreen.greenmail.util.*;
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import java.io.ByteArrayOutputStream;
 
 import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.internet.MimeMultipart;
-import java.io.ByteArrayOutputStream;
+
+import org.junit.After;
+import org.junit.Test;
+
+import com.icegreen.greenmail.util.GreenMail;
+import com.icegreen.greenmail.util.GreenMailUtil;
+import com.icegreen.greenmail.util.Retriever;
+import com.icegreen.greenmail.util.ServerSetup;
+import com.icegreen.greenmail.util.ServerSetupTest;
 
 /**
  * @author Wael Chatila
  * @version $Id: $
  * @since Jan 28, 2006
  */
-public class Pop3ServerTest extends TestCase {
+public class Pop3ServerTest {
 
     GreenMail greenMail;
 
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() {
         try {
             greenMail.stop();
         } catch (NullPointerException ignored) {
             //empty
         }
-        super.tearDown();
     }
 
+    @Test
     public void testRetreive() throws Exception {
         greenMail = new GreenMail(ServerSetupTest.SMTP_POP3);
         assertNotNull(greenMail.getPop3());
@@ -46,6 +59,7 @@ public class Pop3ServerTest extends TestCase {
         assertEquals(body, GreenMailUtil.getBody(messages[0]).trim());
     }
 
+    @Test
     public void testPop3sReceive() throws Throwable {
         greenMail = new GreenMail(new ServerSetup[]{ServerSetupTest.SMTPS, ServerSetupTest.POP3S});
         assertNull(greenMail.getPop3());
@@ -64,6 +78,7 @@ public class Pop3ServerTest extends TestCase {
         assertEquals(body, GreenMailUtil.getBody(messages[0]).trim());
     }
 
+    @Test
     public void testRetreiveWithNonDefaultPassword() throws Exception {
         greenMail = new GreenMail(ServerSetupTest.SMTP_POP3);
         assertNotNull(greenMail.getPop3());
@@ -91,6 +106,7 @@ public class Pop3ServerTest extends TestCase {
         assertEquals(body, GreenMailUtil.getBody(messages[0]).trim());
     }
 
+    @Test
     public void testRetriveMultipart() throws Exception {
         greenMail = new GreenMail(ServerSetupTest.SMTP_POP3);
         assertNotNull(greenMail.getPop3());

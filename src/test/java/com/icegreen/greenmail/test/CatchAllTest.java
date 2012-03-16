@@ -1,27 +1,32 @@
 package com.icegreen.greenmail.test;
 
+import static org.junit.Assert.assertEquals;
+
+import org.junit.After;
+import org.junit.Test;
+
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.GreenMailUtil;
 import com.icegreen.greenmail.util.ServerSetupTest;
-import junit.framework.TestCase;
 
 /**
  * @author Wael Chatila
  * @version $Id: $
  * @since May 27th, 2009
  */
-public class CatchAllTest extends TestCase {
+public class CatchAllTest {
     GreenMail greenMail;
 
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() {
         try {
             greenMail.stop();
         } catch (NullPointerException ignored) {
             //empty
         }
-        super.tearDown();
     }
 
+    @Test
     public void testSmtpServerBasic() {
         greenMail = new GreenMail(ServerSetupTest.SMTP);
         greenMail.start();

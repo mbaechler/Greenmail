@@ -6,23 +6,29 @@
  */
 package com.icegreen.greenmail.test;
 
-import com.icegreen.greenmail.util.GreenMailUtil;
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+
+import org.junit.Test;
+
+import com.icegreen.greenmail.util.GreenMailUtil;
 
 /**
  * @author Wael Chatila
  * @version $Id: $
  * @since Jan 29, 2006
  */
-public class GreenMailUtilTest extends TestCase {
+public class GreenMailUtilTest {
+	
+	@Test
     public void testMimeMessageLoading() throws MessagingException {
         MimeMessage message = GreenMailUtil.newMimeMessage(sampleEmail);
         assertEquals("wassup", message.getSubject());
     }
 
+	@Test
     public void testGetBody() {
         MimeMessage message = GreenMailUtil.newMimeMessage(sampleEmail);
         String body = GreenMailUtil.getBody(message);

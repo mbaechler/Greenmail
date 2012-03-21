@@ -6,15 +6,16 @@
  */
 package com.icegreen.greenmail.imap.commands;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
-import com.icegreen.greenmail.imap.*;
+import com.icegreen.greenmail.imap.ImapRequestLineReader;
+import com.icegreen.greenmail.imap.ImapResponse;
+import com.icegreen.greenmail.imap.ImapSession;
+import com.icegreen.greenmail.imap.ImapSessionFolder;
+import com.icegreen.greenmail.imap.ProtocolException;
 import com.icegreen.greenmail.store.FolderException;
 import com.icegreen.greenmail.store.MailFolder;
 
@@ -61,7 +62,7 @@ class CopyCommand extends SelectedStateCommand implements UidEnabledCommand {
 //        }
 //        currentMailbox.copyMessages(toMailbox, idSet);
         long[] uids = currentMailbox.getMessageUids();
-        Map uidsOfCopiedAndNewMessages = new LinkedHashMap(uids.length);
+        Map<Long, Long> uidsOfCopiedAndNewMessages = new LinkedHashMap<Long, Long>(uids.length);
         for (int i = 0; i < uids.length; i++) {
             long uid = uids[i];
             boolean inSet;
@@ -74,7 +75,7 @@ class CopyCommand extends SelectedStateCommand implements UidEnabledCommand {
 
             if (inSet) {
             	long newMessageUid = currentMailbox.copyMessage(uid, toFolder);
-				uidsOfCopiedAndNewMessages.put(Long.valueOf(uid), Long.valueOf(newMessageUid));
+				uidsOfCopiedAndNewMessages.put(uid, newMessageUid);
             }
         }
         
@@ -83,14 +84,14 @@ class CopyCommand extends SelectedStateCommand implements UidEnabledCommand {
         response.taggedResponseCompleted(copyUidResponse);
     }
 
-    private String buildCOPYUIDResponse(Map uidsOfCopiedAndNewMessages, long mailboxUidValidity) {
+    private String buildCOPYUIDResponse(Map<Long, Long> uidsOfCopiedAndNewMessages, long mailboxUidValidity) {
     	String UID_SEPARATOR = " ";
     	StringBuilder builder = new StringBuilder("[COPYUID ");
     	builder.append(mailboxUidValidity);
     	
-    	Iterator uidsIterator = uidsOfCopiedAndNewMessages.entrySet().iterator();
+    	Iterator<Entry<Long, Long>> uidsIterator = uidsOfCopiedAndNewMessages.entrySet().iterator();
 		while (uidsIterator.hasNext()) {
-			Entry uids = (Entry) uidsIterator.next();
+			Entry<Long, Long> uids = uidsIterator.next();
 			builder.append(UID_SEPARATOR);
     		builder.append(uids.getKey());
 			builder.append(UID_SEPARATOR);

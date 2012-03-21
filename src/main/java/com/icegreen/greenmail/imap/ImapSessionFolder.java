@@ -16,9 +16,9 @@ import java.util.TreeMap;
 
 import javax.mail.Flags;
 import javax.mail.internet.MimeMessage;
-import javax.mail.search.SearchTerm;
 
 import com.icegreen.greenmail.foedus.util.MsgRangeFilter;
+import com.icegreen.greenmail.imap.commands.search.Criteria;
 import com.icegreen.greenmail.mail.MovingMessage;
 import com.icegreen.greenmail.store.FolderException;
 import com.icegreen.greenmail.store.FolderListener;
@@ -209,7 +209,7 @@ public class ImapSessionFolder implements MailFolder, FolderListener {
         _folder.expunge();
     }
 
-    public long[] search(SearchTerm searchTerm) {
+    public long[] search(Criteria searchTerm) {
         return _folder.search(searchTerm);
     }
 

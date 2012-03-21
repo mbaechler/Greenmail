@@ -18,10 +18,10 @@ import java.util.StringTokenizer;
 import javax.mail.Flags;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
-import javax.mail.search.SearchTerm;
 
 import com.icegreen.greenmail.foedus.util.MsgRangeFilter;
 import com.icegreen.greenmail.imap.ImapConstants;
+import com.icegreen.greenmail.imap.commands.search.Criteria;
 import com.icegreen.greenmail.mail.MovingMessage;
 
 /**
@@ -457,12 +457,12 @@ public class InMemoryStore
             mailMessages.remove(msn - 1); //NOTE BY WAEL: is this really correct, the number of items in the iterating list is changed see expunge()
         }
 
-        public long[] search(SearchTerm searchTerm) {
+        public long[] search(Criteria searchTerm) {
             ArrayList<SimpleStoredMessage> matchedMessages = new ArrayList<SimpleStoredMessage>();
 
             for (int i = 0; i < mailMessages.size(); i++) {
                 SimpleStoredMessage message = mailMessages.get(i);
-                if (searchTerm.match(message.getMimeMessage())) {
+                if (searchTerm.match(message)) {
                     matchedMessages.add(message);
                 }
             }

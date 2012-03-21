@@ -6,6 +6,7 @@
  */
 package com.icegreen.greenmail.imap;
 
+
 /**
  * @author Darrell DeBoer <darrell@apache.org>
  * @version $Revision: 109034 $
@@ -14,4 +15,8 @@ public class ProtocolException extends Exception {
     public ProtocolException(String s) {
         super(s);
     }
+
+	public ProtocolException(Throwable e) {
+		super(e);
+	}
 }

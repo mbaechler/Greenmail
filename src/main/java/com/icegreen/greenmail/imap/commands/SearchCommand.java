@@ -6,15 +6,21 @@
  */
 package com.icegreen.greenmail.imap.commands;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.icegreen.greenmail.imap.ImapRequestLineReader;
 import com.icegreen.greenmail.imap.ImapResponse;
 import com.icegreen.greenmail.imap.ImapSession;
 import com.icegreen.greenmail.imap.ProtocolException;
+import com.icegreen.greenmail.imap.commands.search.After;
+import com.icegreen.greenmail.imap.commands.search.Before;
+import com.icegreen.greenmail.imap.commands.search.Criteria;
+import com.icegreen.greenmail.imap.commands.search.Deleted;
+import com.icegreen.greenmail.imap.commands.search.Not;
 import com.icegreen.greenmail.store.FolderException;
 import com.icegreen.greenmail.store.MailFolder;
-
-import javax.mail.Message;
-import javax.mail.search.SearchTerm;
+import com.icegreen.greenmail.store.SimpleStoredMessage;
 
 /**
  * Handles processeing for the SEARCH imap command.
@@ -44,7 +50,7 @@ class SearchCommand extends SelectedStateCommand implements UidEnabledCommand {
                           boolean useUids)
             throws ProtocolException, FolderException {
         // Parse the search term from the request
-        SearchTerm searchTerm = searchCommandParserr.searchTerm(request);
+    	Criteria searchTerm = searchCommandParserr.searchTerm(request);
         searchCommandParserr.endLine(request);
 
         MailFolder folder = session.getSelected();
@@ -90,23 +96,69 @@ class SearchCommand extends SelectedStateCommand implements UidEnabledCommand {
          * Not yet implemented - all searches will return everything for now.
          * TODO implement search
          */
-        public SearchTerm searchTerm(ImapRequestLineReader request)
+        public Criteria searchTerm(ImapRequestLineReader request)
                 throws ProtocolException {
+        	
             // Dummy implementation
             // Consume to the end of the line.
-            char next = request.nextChar();
-            while (next != '\n') {
-                request.consume();
-                next = request.nextChar();
-            }
-
+        	final List<Criteria> criterias = parseCriterias(request);
+            
             // Return a search term that matches everything.
-            return new SearchTerm() {
-                public boolean match(Message message) {
+            return new Criteria() {
+                public boolean match(SimpleStoredMessage message) {
+                	for (Criteria criteria: criterias) {
+                		if (!criteria.match(message)) {
+                			return false;
+                		}
+                	}
                     return true;
                 }
             };
         }
+
+        private List<Criteria> parseCriterias(ImapRequestLineReader request) throws ProtocolException {
+        	List<Criteria> criterias = new ArrayList<Criteria>();
+        	while (request.nextChar() != '\r' && request.nextChar() != '\n') {
+        		Criteria criteria = parseCriteria(request);
+        		if (criteria != null) {
+        			criterias.add(criteria);
+        		}
+        	}
+        	return criterias;
+        }
+        
+        private Criteria parseCriteria(ImapRequestLineReader request) throws ProtocolException {
+        	String criteria = readNextToken(request);
+            if (criteria.equals("NOT")) {
+            	return new Not(parseCriteria(request));
+            } else if (criteria.equals("ALL")) {
+            	return null;
+            } else if (criteria.equals("DELETED")) {
+            	return new Deleted();
+            } else if (criteria.equals("(DELETED)")) {
+            	return new Deleted();
+            } else if (criteria.equals("BEFORE")) {
+            	String date = readNextToken(request);
+            	return new Before(date);
+            } else if (criteria.equals("AFTER")) {
+            	String date = readNextToken(request);
+            	return new After(date);
+            }
+            throw new ProtocolException("criteria not supported : "  + criteria);
+        }
+        
+        
+		private String readNextToken(ImapRequestLineReader request) throws ProtocolException {
+			StringBuffer stringBuffer = new StringBuffer();
+
+			char next = request.nextWordChar();
+			while (!Character.isWhitespace(next) && next != '\r' && next != '\n') {
+            	stringBuffer.append(next);
+                request.consume();
+                next = request.nextChar();
+            }
+			return stringBuffer.toString();
+		}
 
     }
 }

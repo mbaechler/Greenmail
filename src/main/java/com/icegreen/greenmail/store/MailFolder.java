@@ -6,14 +6,15 @@
  */
 package com.icegreen.greenmail.store;
 
-import com.icegreen.greenmail.mail.MovingMessage;
-import com.icegreen.greenmail.foedus.util.MsgRangeFilter;
+import java.util.Date;
+import java.util.List;
 
 import javax.mail.Flags;
 import javax.mail.internet.MimeMessage;
-import javax.mail.search.SearchTerm;
-import java.util.Date;
-import java.util.List;
+
+import com.icegreen.greenmail.foedus.util.MsgRangeFilter;
+import com.icegreen.greenmail.imap.commands.search.Criteria;
+import com.icegreen.greenmail.mail.MovingMessage;
 
 /**
  * Represents a mailbox within an {@link com.icegreen.greenmail.store.Store}.
@@ -64,7 +65,7 @@ public interface MailFolder {
 
     long[] getMessageUids();
 
-    long[] search(SearchTerm searchTerm);
+    long[] search(Criteria searchTerm);
 
     long copyMessage(long uid, MailFolder toFolder)
             throws FolderException;

@@ -10,6 +10,7 @@ import com.icegreen.greenmail.imap.ImapHostManager;
 
 import javax.mail.internet.MimeMessage;
 import java.io.Serializable;
+import java.util.Date;
 
 
 public class UserImpl implements GreenMailUser, Serializable {
@@ -62,6 +63,16 @@ public class UserImpl implements GreenMailUser, Serializable {
         }
     }
 
+    @Override
+    public void deliver(MimeMessage message, Date internalDate)
+    		throws UserException {
+    	try {
+            imapHostManager.getInbox(this).store(message, internalDate);
+        } catch (Exception me) {
+            throw new UserException(me);
+        }
+    }
+    
     public String getEmail() {
         return email;
     }

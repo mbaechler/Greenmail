@@ -6,6 +6,8 @@
  */
 package com.icegreen.greenmail.user;
 
+import java.util.Date;
+
 import com.icegreen.greenmail.mail.MovingMessage;
 
 import javax.mail.internet.MimeMessage;
@@ -17,7 +19,8 @@ public interface GreenMailUser {
     String getLogin();
     void deliver(MovingMessage msg) throws UserException;
     void deliver(MimeMessage msg) throws UserException;
-
+    void deliver(MimeMessage message, Date internalDate) throws UserException;
+    
     void create() throws UserException;
 
     void delete()

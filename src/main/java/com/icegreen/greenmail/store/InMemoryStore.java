@@ -425,10 +425,15 @@ public class InMemoryStore
 
         public void store(MimeMessage message) throws Exception {
             Date internalDate = new Date();
+            store(message, internalDate);
+        }
+
+        public void store(MimeMessage message, Date internalDate) throws Exception {
             Flags flags = new Flags();
             appendMessage(message, flags, internalDate);
         }
 
+        
         public SimpleStoredMessage getMessage(long uid) {
             for (int i = 0; i < mailMessages.size(); i++) {
                 SimpleStoredMessage message = mailMessages.get(i);

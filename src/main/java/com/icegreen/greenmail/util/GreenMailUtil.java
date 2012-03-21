@@ -17,6 +17,7 @@ import javax.mail.MessagingException;
 import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.Transport;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
@@ -221,21 +222,25 @@ public class GreenMailUtil {
 
     public static void sendTextEmail(String to, String from, String subject, String msg, final ServerSetup setup) {
         try {
-            Session session = getSession(setup);
-
-            Address[] tos = new javax.mail.Address[0];
-            tos = new InternetAddress[]{new InternetAddress(to)};
-            Address[] froms = new InternetAddress[]{new InternetAddress(from)};
-            MimeMessage mimeMessage = new MimeMessage(session);
-            mimeMessage.setSubject(subject);
-            mimeMessage.setFrom(froms[0]);
-
-            mimeMessage.setText(msg);
+        	MimeMessage mimeMessage = buildSimpleMessage(from, subject, msg, setup);
+        	Address[] tos = new InternetAddress[]{new InternetAddress(to)};
             Transport.send(mimeMessage, tos);
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
     }
+
+	public static MimeMessage buildSimpleMessage(String from, String subject, String msg, final ServerSetup setup) 
+			throws AddressException, MessagingException {
+
+		Session session = getSession(setup);
+		Address[] froms = new InternetAddress[]{new InternetAddress(from)};
+		MimeMessage mimeMessage = new MimeMessage(session);
+		mimeMessage.setSubject(subject);
+		mimeMessage.setFrom(froms[0]);
+		mimeMessage.setText(msg);
+		return mimeMessage;
+	}
 
     public static Session getSession(final ServerSetup setup) {
         Properties props = new Properties();

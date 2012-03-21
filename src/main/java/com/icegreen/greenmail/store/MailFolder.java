@@ -58,7 +58,8 @@ public interface MailFolder {
 
     void store(MovingMessage mail) throws Exception;
     void store(MimeMessage mail) throws Exception;
-
+    void store(MimeMessage message, Date internalDate) throws Exception;
+    
     SimpleStoredMessage getMessage(long uid);
 
     long[] getMessageUids();
@@ -79,4 +80,5 @@ public interface MailFolder {
     List<SimpleStoredMessage> getMessages(MsgRangeFilter msgRangeFilter);
     List<SimpleStoredMessage> getMessages();
     List<SimpleStoredMessage> getNonDeletedMessages();
+	
 }

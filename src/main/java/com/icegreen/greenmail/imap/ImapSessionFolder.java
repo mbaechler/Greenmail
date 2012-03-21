@@ -193,6 +193,10 @@ public class ImapSessionFolder implements MailFolder, FolderListener {
         _folder.store(mail);
     }
 
+    public void store(MimeMessage mail, Date internalDate) throws Exception {
+        _folder.store(mail, internalDate);
+    }
+    
     public SimpleStoredMessage getMessage(long uid) {
         return _folder.getMessage(uid);
     }

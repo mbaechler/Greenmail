@@ -7,6 +7,7 @@
 package com.icegreen.greenmail.imap.commands;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -15,7 +16,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import javax.mail.BodyPart;
 import javax.mail.Flags;
+import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
@@ -24,6 +27,7 @@ import com.icegreen.greenmail.imap.ImapResponse;
 import com.icegreen.greenmail.imap.ImapSession;
 import com.icegreen.greenmail.imap.ImapSessionFolder;
 import com.icegreen.greenmail.imap.ProtocolException;
+import com.icegreen.greenmail.mail.MailException;
 import com.icegreen.greenmail.store.FolderException;
 import com.icegreen.greenmail.store.MessageFlags;
 import com.icegreen.greenmail.store.SimpleStoredMessage;
@@ -213,15 +217,61 @@ class FetchCommand extends SelectedStateCommand implements UidEnabledCommand {
             bytes = doPartial(partial, bytes, response);
             addLiteral(bytes, response);
         } else {
-            int partNumber = Integer.parseInt(sectionSpecifier) - 1;
-            MimeMultipart mp = (MimeMultipart) mimeMessage.getContent();
-            byte[] bytes = GreenMailUtil.getBodyAsBytes(mp.getBodyPart(partNumber));
+        	byte[] bytes = fetchPart(mimeMessage, sectionSpecifier);
             bytes = doPartial(partial, bytes, response);
             addLiteral(bytes, response);
         }
     }
+    
+	private byte[] fetchPart(MimeMessage mimeMessage, String sectionSpecifier) throws IOException, MessagingException, MailException {
+		Object partToFetch = mimeMessage.getContent();
+		String sectionSeparator = "\\.";
+		String[] treeOfPart = sectionSpecifier.split(sectionSeparator);
+		for (int i = 0 ; i < treeOfPart.length; i++) {
+			int treeLeafPart = Integer.parseInt(treeOfPart[i]) - 1;
+			if (hasToSearchDeeper(treeOfPart.length, i)) {
+		    	partToFetch = extractBodyPart(partToFetch);
+				if (partToFetch instanceof MimeMultipart) {
+					partToFetch = ((MimeMultipart) partToFetch).getBodyPart(treeLeafPart);
+				} else {
+					throw new MailException("The mail hasn't the hierarchy expected");
+				}
+			} else {
+				return fetchPart(partToFetch, treeLeafPart);
+			}
+		}
+		throw new MailException("The mail hasn't the hierarchy expected");
+	}
 
-    private byte[] doPartial(String partial, byte[] bytes, StringBuffer response) {
+    private byte[] fetchPart(Object partToFetch, int treeLeafPart) throws IOException, MessagingException, MailException {
+    	partToFetch = extractBodyPart(partToFetch);
+    	if (partToFetch instanceof MimeMultipart) {
+			MimeMultipart mp = (MimeMultipart) partToFetch;
+			return GreenMailUtil.getBodyAsBytes(mp.getBodyPart(treeLeafPart));
+		} else if (partToFetch instanceof String){
+			return ((String) partToFetch).getBytes();
+		} else {
+			throw new MailException("Could not extract content to fetch");
+		}
+	}
+
+	private Object extractBodyPart(Object partToFetch) throws IOException, MessagingException {
+		if (partToFetch instanceof BodyPart) {
+			BodyPart bodyPart = (BodyPart) partToFetch;
+			partToFetch = bodyPart.getContent();
+			if (partToFetch instanceof MimeMessage) {
+				MimeMessage mime= (MimeMessage) partToFetch;
+				partToFetch = (MimeMultipart) mime.getContent();
+			}
+		}
+		return partToFetch;
+	}
+
+	private boolean hasToSearchDeeper(int hierarchyLenght, int actual) {
+		return hierarchyLenght-1 > actual;
+	}
+
+	private byte[] doPartial(String partial, byte[] bytes, StringBuffer response) {
         if (null != partial) {
             String[] strs = partial.split("\\.");
             int start = Integer.parseInt(strs[0]);

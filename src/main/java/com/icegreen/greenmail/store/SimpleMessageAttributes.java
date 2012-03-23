@@ -85,18 +85,22 @@ public class SimpleMessageAttributes
     SimpleMessageAttributes() {
     }
 
-    void setAttributesFor(MimeMessage msg) {
-        try {
-            internalDate = msg.getSentDate();
-        } catch (MessagingException me) {
-            internalDate = new Date();
+    void setAttributesFor(MimeMessage msg, Date internalDate) {
+        if (internalDate != null) {
+        	this.internalDate = internalDate;
+        } else {
+        	try {
+        		this.internalDate = msg.getSentDate();
+        	} catch (MessagingException me) {
+        		this.internalDate = new Date();
+        	}
+        	if (null == this.internalDate) {
+        		this.internalDate = new Date();
+        	}
         }
-        if (null == internalDate) {
-            internalDate = new Date();
-        }
-
-        internalDateString = new SimpleDateFormat("dd-MMM-yyyy hh:mm:ss Z").format(internalDate);
-        interalDateEnvelopeString = new MailDateFormat().format(internalDate);
+        
+        internalDateString = new SimpleDateFormat("dd-MMM-yyyy hh:mm:ss Z").format(this.internalDate);
+        interalDateEnvelopeString = new MailDateFormat().format(this.internalDate);
         parseMimePart(msg);
     }
 

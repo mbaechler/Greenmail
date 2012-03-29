@@ -1,7 +1,7 @@
 /*
 * Copyright (c) 2006 Your Corporation. All Rights Reserved.
 */
-package com.icegreen.greenmail.test;
+package com.icegreen.greenmail;
 
 import com.icegreen.greenmail.util.*;
 import junit.framework.TestCase;

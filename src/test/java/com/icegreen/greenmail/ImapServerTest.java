@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2006 Your Corporation. All Rights Reserved.
  */
-package com.icegreen.greenmail.test;
+package com.icegreen.greenmail;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

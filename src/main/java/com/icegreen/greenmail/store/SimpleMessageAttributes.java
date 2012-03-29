@@ -667,25 +667,29 @@ public class SimpleMessageAttributes
 
     //~ inner class
     private static class Header {
-        String value;
-        Set<String> params = null;
+		private final String value;
+		private final Set<String> params;
 
-        public Header(String line) {
-            String[] strs = line.split(";");
-            value = strs[0];
-            if (0 != strs.length) {
-                params = new HashSet<String>();
-                for (int i = 1; i < strs.length; i++) {
-                    String p = strs[i].trim();
-                    int e = p.indexOf("=");
-                    String key = p.substring(0, e);
-                    String value = p.substring(e + 1, p.length());
-                    p = Q + strip(key) + Q + SP + Q + strip(value) + Q;
-                    params.add(p);
-                }
-            }
-        }
+		public Header(String line) {
+			String[] strs = line.split(";");
+			this.value = strs[0];
+			this.params = new HashSet<String>();
+			decodeParams(strs);
+		}
 
+		private void decodeParams(String[] strs) {
+			if (0 != strs.length) {
+				for (int i = 1; i < strs.length; i++) {
+					String p = strs[i].trim();
+					int e = p.indexOf("=");
+					String key = p.substring(0, e);
+					String value = p.substring(e + 1, p.length());
+					p = Q + strip(key) + Q + SP + Q + strip(value) + Q;
+					params.add(p);
+				}
+			}
+		}
+        
         public Set<String> getParams() {
             return params;
         }
@@ -696,9 +700,12 @@ public class SimpleMessageAttributes
 
         public String toString() {
             StringBuffer ret = new StringBuffer();
-            if (null == params) {
-                ret.append(Q + value + Q);
-            } else {
+			if (params.isEmpty()) {
+				ret.append(LB);
+				ret.append(Q + value + Q + SP);
+				ret.append(NIL);
+				ret.append(RB);
+			} else {
                 ret.append(LB);
                 ret.append(Q + value + Q + SP);
                 ret.append(LB);

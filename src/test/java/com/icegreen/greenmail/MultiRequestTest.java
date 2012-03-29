@@ -3,7 +3,7 @@
 * This software is released under the LGPL which is available at http://www.gnu.org/copyleft/lesser.html
 * -------------------------------------------------------------------
 */
-package com.icegreen.greenmail.test;
+package com.icegreen.greenmail;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

@@ -4,7 +4,7 @@
  * This file has been modified by the copyright holder.
  * -------------------------------------------------------------------
  */
-package com.icegreen.greenmail.test;
+package com.icegreen.greenmail;
 
 import static org.junit.Assert.assertEquals;
 

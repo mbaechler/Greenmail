@@ -471,6 +471,9 @@ public class SimpleMessageAttributes
             Iterator<String> it = parameters.iterator();
             while (it.hasNext()) {
                 buf.append(it.next());
+                if (it.hasNext()) {
+                	buf.append(SP);
+                }
             }
             buf.append(RB);
         }

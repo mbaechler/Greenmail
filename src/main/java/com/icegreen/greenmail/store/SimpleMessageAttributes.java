@@ -687,7 +687,7 @@ public class SimpleMessageAttributes
 					int e = p.indexOf("=");
 					String key = p.substring(0, e);
 					String value = p.substring(e + 1, p.length());
-					p = Q + strip(key) + Q + SP + Q + strip(value) + Q;
+					p = Q + strip(key) + Q + SP + Q + strip(value.trim()) + Q;
 					params.add(p);
 				}
 			}

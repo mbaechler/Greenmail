@@ -11,6 +11,7 @@ import com.icegreen.greenmail.util.Service;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.UnknownHostException;
 import java.net.BindException;
@@ -69,7 +70,10 @@ public abstract class AbstractServer extends Service {
     }
 
     public int getPort() {
-        return setup.getPort();
+        if (serverSocket != null && serverSocket.getLocalPort() != -1) {
+            return serverSocket.getLocalPort();
+        }
+        throw new IllegalStateException("No listening port. Start the server first.");
     }
 
     public String getProtocol() {
@@ -77,10 +81,14 @@ public abstract class AbstractServer extends Service {
     }
 
     public ServerSetup getServerSetup() {
+        if (setup == null) {
+            InetAddress boundAddress = ((InetSocketAddress)serverSocket.getLocalSocketAddress()).getAddress();
+            setup = new ServerSetup(getPort(), boundAddress.getHostAddress(), getProtocol());
+        }
         return setup;
     }
 
     public String toString() {
-        return null!=setup? setup.getProtocol()+':'+setup.getPort() : super.toString();
+        return null!=getServerSetup()? setup.getProtocol()+':'+setup.getPort() : super.toString();
     }
 }

@@ -9,6 +9,7 @@ package com.icegreen.greenmail.imap;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Iterator;
+import java.util.concurrent.Semaphore;
 
 import com.icegreen.greenmail.AbstractServer;
 import com.icegreen.greenmail.Managers;
@@ -16,8 +17,11 @@ import com.icegreen.greenmail.util.ServerSetup;
 
 public final class ImapServer extends AbstractServer {
 
-    public ImapServer(ServerSetup setup, Managers managers) {
+    private final Semaphore lock;
+
+	public ImapServer(ServerSetup setup, Managers managers, Semaphore lock) {
         super(setup, managers);
+		this.lock = lock;
     }
 
 
@@ -58,7 +62,7 @@ public final class ImapServer extends AbstractServer {
             while (keepOn()) {
                 try {
                     Socket clientSocket = serverSocket.accept();
-                    ImapHandler imapHandler = new ImapHandler(managers.getUserManager(), managers.getImapHostManager(), clientSocket);
+                    ImapHandler imapHandler = new ImapHandler(managers.getUserManager(), managers.getImapHostManager(), clientSocket, lock);
                     handlers.add(imapHandler);
                     imapHandler.start();
                 } catch (IOException ignored) {

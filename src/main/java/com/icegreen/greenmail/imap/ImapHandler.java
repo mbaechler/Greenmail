@@ -6,11 +6,17 @@
 */
 package com.icegreen.greenmail.imap;
 
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.util.concurrent.Semaphore;
+
 import com.icegreen.greenmail.user.UserManager;
 import com.icegreen.greenmail.util.InternetPrintWriter;
-
-import java.io.*;
-import java.net.Socket;
 
 /**
  * The handler class for IMAP connections.
@@ -53,11 +59,13 @@ public class ImapHandler extends Thread implements ImapConstants {
 
     UserManager userManager;
     private ImapHostManager imapHost;
+	private final Semaphore lock;
 
-    public ImapHandler(UserManager userManager, ImapHostManager imapHost, Socket socket) {
+    public ImapHandler(UserManager userManager, ImapHostManager imapHost, Socket socket, Semaphore lock) {
         this.userManager = userManager;
         this.imapHost = imapHost;
         this.socket = socket;
+		this.lock = lock;
     }
 
     public void forceConnectionClose(final String message) {
@@ -95,7 +103,7 @@ public class ImapHandler extends Thread implements ImapConstants {
                     socket.getInetAddress().getHostName(),
                     socket.getInetAddress().getHostAddress());
 
-            while (requestHandler.handleRequest(ins, outs, session)) {
+            while (requestHandler.handleRequest(ins, outs, session, lock)) {
             	//Nothing to do
             }
 

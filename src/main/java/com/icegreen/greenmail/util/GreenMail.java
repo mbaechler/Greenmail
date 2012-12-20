@@ -5,18 +5,24 @@
  */
 package com.icegreen.greenmail.util;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
+import java.util.concurrent.Semaphore;
+
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+
 import com.icegreen.greenmail.Managers;
+import com.icegreen.greenmail.imap.ImapServer;
 import com.icegreen.greenmail.pop3.Pop3Server;
 import com.icegreen.greenmail.smtp.SmtpManager;
 import com.icegreen.greenmail.smtp.SmtpServer;
+import com.icegreen.greenmail.store.SimpleStoredMessage;
 import com.icegreen.greenmail.user.GreenMailUser;
 import com.icegreen.greenmail.user.UserException;
-import com.icegreen.greenmail.imap.ImapServer;
-import com.icegreen.greenmail.store.SimpleStoredMessage;
-
-import javax.mail.internet.MimeMessage;
-import javax.mail.MessagingException;
-import java.util.*;
 
 /**
  * @author Wael Chatila
@@ -24,6 +30,7 @@ import java.util.*;
  * @since Jan 28, 2006
  */
 public class GreenMail {
+	Semaphore lock = new Semaphore(1);
     Managers managers;
     HashMap<String, Service> services;
 
@@ -61,7 +68,7 @@ public class GreenMail {
             } else if (protocol.startsWith(ServerSetup.PROTOCOL_POP3)) {
                 services.put(protocol, new Pop3Server(setup, managers));
             } else if (protocol.startsWith(ServerSetup.PROTOCOL_IMAP)) {
-                services.put(protocol, new ImapServer(setup, managers));
+                services.put(protocol, new ImapServer(setup, managers, lock));
             }
         }
     }
@@ -246,4 +253,8 @@ public class GreenMail {
     public GreenMailUtil util() {
         return GreenMailUtil.instance();
     }
+    
+    public Semaphore getLock() {
+		return lock;
+	}
 }

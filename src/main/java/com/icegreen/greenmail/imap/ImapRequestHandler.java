@@ -6,12 +6,13 @@
  */
 package com.icegreen.greenmail.imap;
 
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.concurrent.Semaphore;
+
 import com.icegreen.greenmail.imap.commands.CommandParser;
 import com.icegreen.greenmail.imap.commands.ImapCommand;
 import com.icegreen.greenmail.imap.commands.ImapCommandFactory;
-
-import java.io.InputStream;
-import java.io.OutputStream;
 
 /**
  * @author Darrell DeBoer <darrell@apache.org>
@@ -29,13 +30,14 @@ public final class ImapRequestHandler {
      * command specific handler methods.  The primary purpose of this method is
      * to parse the raw command string to determine exactly which handler should
      * be called.  It returns true if expecting additional commands, false otherwise.
+     * @param lock 
      *
      * @return whether additional commands are expected.
      */
     public boolean handleRequest(InputStream input,
                                  OutputStream output,
-                                 ImapSession session)
-            throws ProtocolException {
+                                 ImapSession session, Semaphore lock)
+            throws ProtocolException, InterruptedException {
         ImapRequestLineReader request = new ImapRequestLineReader(input, output);
         try {
             request.nextChar();
@@ -45,6 +47,8 @@ public final class ImapRequestHandler {
 
         ImapResponse response = new ImapResponse(output);
 
+        lock.acquire();
+        lock.release();
         doProcessRequest(request, response, session);
 
         // Consume the rest of the line, throwing away any extras. This allows us

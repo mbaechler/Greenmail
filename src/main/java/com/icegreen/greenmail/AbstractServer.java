@@ -81,11 +81,8 @@ public abstract class AbstractServer extends Service {
     }
 
     public ServerSetup getServerSetup() {
-        if (setup == null) {
-            InetAddress boundAddress = ((InetSocketAddress)serverSocket.getLocalSocketAddress()).getAddress();
-            setup = new ServerSetup(getPort(), boundAddress.getHostAddress(), getProtocol());
-        }
-        return setup;
+        InetAddress boundAddress = ((InetSocketAddress)serverSocket.getLocalSocketAddress()).getAddress();
+        return new ServerSetup(getPort(), boundAddress.getHostAddress(), getProtocol());
     }
 
     public String toString() {

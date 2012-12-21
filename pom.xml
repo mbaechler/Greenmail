@@ -4,7 +4,7 @@
 
   <groupId>greenmail</groupId>
   <artifactId>greenmail</artifactId>
-  <version>1.3.1b-mbaechler-10</version>
+  <version>1.3.1b-mbaechler-11</version>
   <packaging>jar</packaging>
 
   <name>greenmail</name>

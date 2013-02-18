@@ -112,21 +112,7 @@ public class SmtpManager {
     private class Incoming {
 
         public void enqueue(MovingMessage msg) {
-            Iterator<MailAddress> iterator = msg.getRecipientIterator();
-            String tos = "";
-            while (iterator.hasNext()) {
-                MailAddress username = iterator.next();
-                if (tos.length()>0) {
-                    tos+=",";
-                }
-                tos+=username;
-            }
-            try {
-                msg.getMessage().addRecipients(Message.RecipientType.TO,tos);
-            } catch (MessagingException e) {
-                throw new RuntimeException(e);
-            }
-            iterator = msg.getRecipientIterator();
+            Iterator<MailAddress> iterator = msg.getRecipientIterator();            
             while (iterator.hasNext()) {
                 MailAddress username = iterator.next();
                 handle(msg, username);

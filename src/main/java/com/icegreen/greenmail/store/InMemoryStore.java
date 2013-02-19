@@ -138,7 +138,7 @@ public class InMemoryStore
             // If the parent from the search pattern doesn't exist,
             // return empty.
             if (parent != null) {
-                Iterator<HierarchicalFolder> children = parent.getChildren().iterator();
+                Iterator<HierarchicalFolder> children = new ArrayList<HierarchicalFolder>(parent.getChildren()).iterator();
                 while (children.hasNext()) {
                     HierarchicalFolder child = children.next();
                     if (child.getName().startsWith(matchPattern)) {
@@ -163,7 +163,7 @@ public class InMemoryStore
 
     private void addAllChildren(HierarchicalFolder mailbox, Collection<MailFolder> mailboxes) {
         Collection<HierarchicalFolder> children = mailbox.getChildren();
-        Iterator<HierarchicalFolder> iterator = children.iterator();
+        Iterator<HierarchicalFolder> iterator = new ArrayList<HierarchicalFolder>(children).iterator();
         while (iterator.hasNext()) {
             HierarchicalFolder child = iterator.next();
             mailboxes.add(child);

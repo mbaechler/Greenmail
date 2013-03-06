@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.Semaphore;
 
 import javax.mail.MessagingException;
@@ -256,5 +258,25 @@ public class GreenMail {
     
     public Semaphore getLock() {
 		return lock;
+	}
+	
+	public void lockGreenmailAndReleaseAfter(int timeoutInSeconds) throws InterruptedException {
+		lock();
+		releaseLockAfter(timeoutInSeconds);
+	}
+
+	private void lock() throws InterruptedException {
+		getLock().acquire();
+	}
+	
+	private void releaseLockAfter(int timeoutInSecond) {
+		new Timer().schedule(
+				new TimerTask() {
+			
+			@Override
+			public void run() {
+				getLock().release();
+			}
+		}, timeoutInSecond * 1000);
 	}
 }

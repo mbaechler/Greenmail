@@ -28,6 +28,7 @@ public class Retriever {
     private int port;
     private String host;
     private Store store = null;
+    private Folder folder = null;
 
     /**
      * Creates a retriever object for a particular server<br>
@@ -79,12 +80,22 @@ public class Retriever {
 //        session.setDebug(true);
         store = session.getStore(protocol);
         store.connect(host, port, account, password);
-        Folder rootFolder = store.getFolder("INBOX");
-        return getMessages(rootFolder).toArray(new Message[0]);
+        folder = store.getFolder("INBOX");
+        return getMessages(folder).toArray(new Message[0]);
     }
 
     public void logout() {
         try {
+        	folder.close(false);
+            store.close();
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void logoutAndExpunge() {
+        try {
+        	folder.close(true);
             store.close();
         } catch (MessagingException e) {
             throw new RuntimeException(e);
@@ -95,7 +106,7 @@ public class Retriever {
         List<Message> ret = new ArrayList<Message>();
         if ((folder.getType() & Folder.HOLDS_MESSAGES) != 0) {
             if (!folder.isOpen()) {
-                folder.open(Folder.READ_ONLY);
+                folder.open(Folder.READ_WRITE);
             }
             Message[] messages = folder.getMessages();
             for (int i = 0; i < messages.length; i++) {

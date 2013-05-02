@@ -60,6 +60,36 @@ public class Pop3ServerTest {
     }
 
     @Test
+    public void testImapExpunge() throws Exception {
+        greenMail = new GreenMail(ServerSetupTest.SMTP_IMAP);
+        assertNotNull(greenMail.getImap());
+        greenMail.start();
+        final String subject = GreenMailUtil.random();
+        final String body = GreenMailUtil.random() + "\r\n" + GreenMailUtil.random() + "\r\n" + GreenMailUtil.random();
+        String to = "test@localhost.com";
+        GreenMailUtil.sendTextEmailTest(to, "from@localhost.com", subject, body);
+        greenMail.waitForIncomingEmail(5000, 1);
+        GreenMailUtil.sendTextEmailTest(to, "from@localhost.com", subject, body);
+        greenMail.waitForIncomingEmail(5000, 1);
+        GreenMailUtil.sendTextEmailTest(to, "from@localhost.com", subject, body);
+        greenMail.waitForIncomingEmail(5000, 1);
+        GreenMailUtil.sendTextEmailTest(to, "from@localhost.com", subject, body);
+        greenMail.waitForIncomingEmail(5000, 1);
+
+        Retriever retriever = new Retriever(greenMail.getImap());
+        Message[] messages = retriever.getMessages(to);
+        assertEquals(4, messages.length);
+        for (Message message : messages) {
+        	message.setFlag(javax.mail.Flags.Flag.DELETED, true);
+        }
+        retriever.logoutAndExpunge();
+        retriever = new Retriever(greenMail.getImap());
+        messages = retriever.getMessages(to);
+        assertEquals(0, messages.length);
+    }
+
+
+    @Test
     public void testPop3sReceive() throws Throwable {
         greenMail = new GreenMail(new ServerSetup[]{ServerSetupTest.SMTPS, ServerSetupTest.POP3S});
         assertNull(greenMail.getPop3());

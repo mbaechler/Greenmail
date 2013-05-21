@@ -433,7 +433,7 @@ public class InMemoryStore
             appendMessage(message, flags, internalDate);
         }
 
-        
+
         public SimpleStoredMessage getMessage(long uid) {
             for (int i = 0; i < mailMessages.size(); i++) {
                 SimpleStoredMessage message = mailMessages.get(i);
@@ -494,7 +494,7 @@ public class InMemoryStore
         }
 
         public void expunge() throws FolderException {
-            for (int i = 0; i < mailMessages.size(); i++) {
+            for (int i = mailMessages.size() - 1; i >= 0; i--) {
                 SimpleStoredMessage message = mailMessages.get(i);
                 if (message.getFlags().contains(Flags.Flag.DELETED)) {
                     expungeMessage(i + 1);

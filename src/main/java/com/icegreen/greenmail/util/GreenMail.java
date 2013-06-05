@@ -14,6 +14,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Semaphore;
 
+import javax.mail.Flags;
+import javax.mail.Flags.Flag;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
@@ -22,6 +24,8 @@ import com.icegreen.greenmail.imap.ImapServer;
 import com.icegreen.greenmail.pop3.Pop3Server;
 import com.icegreen.greenmail.smtp.SmtpManager;
 import com.icegreen.greenmail.smtp.SmtpServer;
+import com.icegreen.greenmail.store.FolderException;
+import com.icegreen.greenmail.store.MailFolder;
 import com.icegreen.greenmail.store.SimpleStoredMessage;
 import com.icegreen.greenmail.user.GreenMailUser;
 import com.icegreen.greenmail.user.UserException;
@@ -279,4 +283,20 @@ public class GreenMail {
 			}
 		}, timeoutInSecond * 1000);
 	}
+    
+    public void deleteEmailFromInbox(GreenMailUser user, long messageId) throws FolderException {
+    	deleteEmail(user, managers.getImapHostManager().getInbox(user), messageId);
+    }
+    
+    public void deleteEmail(GreenMailUser user, MailFolder folder, long messageId) throws FolderException {
+		folder.setFlags(new Flags(Flag.DELETED), true, messageId, null, false);
+    }
+    
+    public void expungeInbox(GreenMailUser user) throws FolderException {
+    	expunge(managers.getImapHostManager().getInbox(user));
+    }
+    
+    public void expunge(MailFolder folder) throws FolderException {
+    	folder.expunge();
+    }
 }

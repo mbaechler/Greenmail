@@ -81,6 +81,7 @@ public class SimpleMessageAttributes
     private String contentEncoding = null;
     private String interalDateEnvelopeString = null;
     private Header contentDisposition = null;
+	private String contentLocation;
 
     SimpleMessageAttributes() {
     }
@@ -175,12 +176,20 @@ public class SimpleMessageAttributes
         try {
             contentID = part.getContentID();
         } catch (MessagingException me) {
-//            if (DEBUG) getLogger().debug("Messaging Exception for getContentUD(): " + me);
+//            if (DEBUG) getLogger().debug("Messaging Exception for getContentID(): " + me);
         }
         try {
             contentDesc = part.getDescription();
         } catch (MessagingException me) {
 //            if (DEBUG) getLogger().debug("Messaging Exception for getDescription(): " + me);
+        }
+        try {
+            String[] location = part.getHeader("Content-Location");
+            if (location != null && location.length > 0) {
+            	contentLocation = location[0];
+            }
+        } catch (MessagingException me) {
+//            if (DEBUG) getLogger().debug("Messaging Exception for getContentLocation(): " + me);
         }
         try {
             contentEncoding = part.getEncoding();
@@ -527,7 +536,11 @@ public class SimpleMessageAttributes
                 getParameters(buf);
                 //4. body id -------
                 buf.append(" ");
-                buf.append(NIL);
+                if (contentID == null) {
+                	buf.append(NIL);
+                } else {
+                	buf.append(Q + contentID + Q);
+                }
                 //5. content desc -------
                 buf.append(" ");
                 if (null != contentDesc) {
@@ -567,6 +580,13 @@ public class SimpleMessageAttributes
                     //10. ext3 language -------
                     buf.append(" ");
                     buf.append(NIL);
+                    
+                    buf.append(" ");
+                    if (contentLocation == null) {
+                    	buf.append(NIL);
+                    } else {
+                    	buf.append(Q + contentLocation + Q);
+                    }
                 } else {
                     // ext1 md5 -------
                     buf.append(" ");
@@ -581,6 +601,13 @@ public class SimpleMessageAttributes
                     //ext3 language -------
                     buf.append(" ");
                     buf.append(NIL);
+                    
+                    buf.append(" ");
+                    if (contentLocation == null) {
+                    	buf.append(NIL);
+                    } else {
+                    	buf.append(Q + contentLocation +Q);
+                    }
                 }
             }
 

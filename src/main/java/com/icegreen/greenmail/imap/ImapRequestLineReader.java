@@ -8,7 +8,9 @@ package com.icegreen.greenmail.imap;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 
 /**
  * Wraps the client input reader with a bunch of convenience methods, allowing lookahead=1
@@ -19,14 +21,14 @@ import java.io.OutputStream;
  * @version $Revision: 109034 $
  */
 public class ImapRequestLineReader {
-    private InputStream input;
     private OutputStream output;
 
     private boolean nextSeen = false;
     private char nextChar; // unknown
+    private InputStreamReader input;
 
     ImapRequestLineReader(InputStream input, OutputStream output) {
-        this.input = input;
+        this.input = new InputStreamReader(input, Charset.forName("utf-8"));
         this.output = output;
     }
 
@@ -134,7 +136,7 @@ public class ImapRequestLineReader {
      * @param holder A char array which will be filled with chars read from the underlying reader.
      * @throws ProtocolException If a char can't be read into each array element.
      */
-    public void read(byte[] holder) throws ProtocolException {
+    public void read(char[] holder) throws ProtocolException {
         int readTotal = 0;
         try {
             while (readTotal < holder.length) {

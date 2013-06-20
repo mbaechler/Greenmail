@@ -200,7 +200,7 @@ public class CommandParser {
         }
 
         int size = Integer.parseInt(digits.toString());
-        byte[] buffer = new byte[size];
+        char[] buffer = new char[size];
         request.read(buffer);
 
         return new String(buffer);

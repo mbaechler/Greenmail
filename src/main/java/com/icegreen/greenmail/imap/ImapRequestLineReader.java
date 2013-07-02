@@ -25,10 +25,10 @@ public class ImapRequestLineReader {
 
     private boolean nextSeen = false;
     private char nextChar; // unknown
-    private InputStreamReader input;
+    private InputStream input;
 
     ImapRequestLineReader(InputStream input, OutputStream output) {
-        this.input = new InputStreamReader(input, Charset.forName("utf-8"));
+        this.input = input;
         this.output = output;
     }
 
@@ -136,7 +136,7 @@ public class ImapRequestLineReader {
      * @param holder A char array which will be filled with chars read from the underlying reader.
      * @throws ProtocolException If a char can't be read into each array element.
      */
-    public void read(char[] holder) throws ProtocolException {
+    public void read(byte[] holder) throws ProtocolException {
         int readTotal = 0;
         try {
             while (readTotal < holder.length) {

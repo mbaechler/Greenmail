@@ -6,6 +6,7 @@
  */
 package com.icegreen.greenmail.imap.commands;
 
+import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -200,10 +201,10 @@ public class CommandParser {
         }
 
         int size = Integer.parseInt(digits.toString());
-        char[] buffer = new char[size];
+        byte[] buffer = new byte[size];
         request.read(buffer);
 
-        return new String(buffer);
+        return new String(buffer, Charset.forName("UTF-8"));
     }
 
     /**

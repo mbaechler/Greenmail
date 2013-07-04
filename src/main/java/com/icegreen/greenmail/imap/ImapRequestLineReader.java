@@ -8,9 +8,15 @@ package com.icegreen.greenmail.imap;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CodingErrorAction;
+import java.nio.charset.MalformedInputException;
+import java.nio.charset.UnmappableCharacterException;
 
 /**
  * Wraps the client input reader with a bunch of convenience methods, allowing lookahead=1
@@ -27,7 +33,12 @@ public class ImapRequestLineReader {
     private char nextChar; // unknown
     private InputStream input;
 
+	private CharsetDecoder utf8Decoder;
+	private CharsetDecoder asciiDecoder;
+
     ImapRequestLineReader(InputStream input, OutputStream output) {
+    	utf8Decoder = Charset.forName("UTF-8").newDecoder();
+    	asciiDecoder = Charset.forName("ASCII").newDecoder().onUnmappableCharacter(CodingErrorAction.REPORT);
         this.input = input;
         this.output = output;
     }
@@ -67,7 +78,19 @@ public class ImapRequestLineReader {
             int next = -1;
 
             try {
-                next = input.read();
+            	byte[] byteArray = new byte[1];
+            	int nbRead = input.read(byteArray);
+            	if (nbRead > 0) {
+            		try {
+            			CharBuffer asciiChar = asciiDecoder.decode(ByteBuffer.wrap(byteArray));
+            			next = asciiChar.get();
+            		} catch (MalformedInputException e) {
+            			next = nextCharUTF8(next, byteArray);
+					}
+            	} else {
+					next = -1;
+            	}
+            	
             } catch (IOException e) {
 //                e.printStackTrace();
                 throw new ProtocolException("Error reading from stream.");
@@ -82,6 +105,28 @@ public class ImapRequestLineReader {
         }
         return nextChar;
     }
+
+	private int nextCharUTF8(int next, byte[] byteArray) throws IOException, CharacterCodingException {
+		int nbRead;
+		byte[] maxBytes = new byte[4];
+		maxBytes[0] = byteArray[0];
+		for (int index = 1; index < maxBytes.length; ++index) {
+			nbRead = input.read(byteArray);
+			if (nbRead > 0) {
+				maxBytes[index] = byteArray[0];
+				try {
+					CharBuffer unicodeChar = utf8Decoder.decode(ByteBuffer.wrap(maxBytes, 0, index + 1));
+					next = unicodeChar.get();
+					break;
+				} catch (UnmappableCharacterException unicodeException) {
+					//just loop one more time
+				}
+			} else {
+				next = -1;
+			}
+		}
+		return next;
+	}
 
     /**
      * Moves the request line reader to end of the line, checking that no non-space

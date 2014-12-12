@@ -17,15 +17,21 @@ public class UserImpl implements GreenMailUser, Serializable {
     String email;
     String login;
     String password;
+    private boolean admin;
     private ImapHostManager imapHostManager;
 
-    public UserImpl(String email, String login, String password, ImapHostManager imapHostManager) {
+    public UserImpl(String email, String login, String password, boolean admin, ImapHostManager imapHostManager) {
         this.email = email;
         this.login = login;
         this.password = password;
+		this.admin = admin;
         this.imapHostManager = imapHostManager;
     }
 
+    public boolean isAdmin() {
+    	return admin;
+    }
+    
     public void create()
             throws UserException {
         try {

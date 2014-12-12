@@ -63,10 +63,19 @@ public class ImapHostManagerImpl
     }
 
     /**
+     * @throws FolderException 
      * @see ImapHostManager#getFolder
      */
-    public MailFolder getFolder(GreenMailUser user, String mailboxName) {
+    public MailFolder getFolder(GreenMailUser user, String mailboxName) throws FolderException {
         String name = getQualifiedMailboxName(user, mailboxName);
+        if (user.isAdmin() && !mailboxName.startsWith(NAMESPACE_PREFIX)) {
+        	Collection<MailFolder> mailboxes = store.listMailboxes(ALL);
+        	for (MailFolder folder : mailboxes) {
+        		if (folder.getFullName().endsWith(mailboxName)) {
+        			return folder;
+        		}
+        	}
+        }
         MailFolder folder = store.getMailbox(name);
         return (checkViewable(folder));
     }
@@ -284,6 +293,9 @@ public class ImapHostManagerImpl
         if ("INBOX".equalsIgnoreCase(mailboxName)) {
             return USER_NAMESPACE + HIERARCHY_DELIMITER + userNamespace +
                     HIERARCHY_DELIMITER + INBOX_NAME;
+        }
+        if (user.isAdmin() && mailboxName.equals(ALL)) {
+        	return USER_NAMESPACE + HIERARCHY_DELIMITER + ALL;
         }
 
         if (mailboxName.startsWith(NAMESPACE_PREFIX)) {

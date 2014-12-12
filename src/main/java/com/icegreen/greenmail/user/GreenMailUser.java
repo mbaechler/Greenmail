@@ -21,6 +21,8 @@ public interface GreenMailUser {
     void deliver(MimeMessage msg) throws UserException;
     void deliver(MimeMessage message, Date internalDate) throws UserException;
     
+    boolean isAdmin();
+    
     void create() throws UserException;
 
     void delete()

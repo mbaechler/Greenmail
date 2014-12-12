@@ -50,8 +50,9 @@ public interface ImapHostManager {
      * @param user        User making the request.
      * @param mailboxName String name of the target.
      * @return an Mailbox reference.
+     * @throws FolderException 
      */
-    MailFolder getFolder(GreenMailUser user, String mailboxName);
+    MailFolder getFolder(GreenMailUser user, String mailboxName) throws FolderException;
 
     /**
      * Returns a reference to an existing Mailbox.

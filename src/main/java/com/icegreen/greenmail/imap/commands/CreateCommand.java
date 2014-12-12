@@ -6,7 +6,11 @@
  */
 package com.icegreen.greenmail.imap.commands;
 
-import com.icegreen.greenmail.imap.*;
+import com.icegreen.greenmail.imap.AuthorizationException;
+import com.icegreen.greenmail.imap.ImapRequestLineReader;
+import com.icegreen.greenmail.imap.ImapResponse;
+import com.icegreen.greenmail.imap.ImapSession;
+import com.icegreen.greenmail.imap.ProtocolException;
 import com.icegreen.greenmail.store.FolderException;
 
 /**
@@ -27,7 +31,7 @@ class CreateCommand extends AuthenticatedStateCommand {
                              ImapSession session)
             throws ProtocolException, FolderException, AuthorizationException {
         String mailboxName = parser.mailbox(request);
-        parser.endLine(request);
+//        parser.endLine(request);
 
         session.getHost().createMailbox(session.getUser(), mailboxName);
         session.unsolicitedResponses(response);

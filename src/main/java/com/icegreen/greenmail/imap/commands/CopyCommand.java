@@ -6,11 +6,10 @@
  */
 package com.icegreen.greenmail.imap.commands;
 
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
+import com.google.common.base.Joiner;
 import com.icegreen.greenmail.imap.ImapRequestLineReader;
 import com.icegreen.greenmail.imap.ImapResponse;
 import com.icegreen.greenmail.imap.ImapSession;
@@ -85,20 +84,13 @@ class CopyCommand extends SelectedStateCommand implements UidEnabledCommand {
     }
 
     private String buildCOPYUIDResponse(Map<Long, Long> uidsOfCopiedAndNewMessages, long mailboxUidValidity) {
-    	String UID_SEPARATOR = " ";
-    	StringBuilder builder = new StringBuilder("[COPYUID ");
-    	builder.append(mailboxUidValidity);
-    	
-    	Iterator<Entry<Long, Long>> uidsIterator = uidsOfCopiedAndNewMessages.entrySet().iterator();
-		while (uidsIterator.hasNext()) {
-			Entry<Long, Long> uids = uidsIterator.next();
-			builder.append(UID_SEPARATOR);
-    		builder.append(uids.getKey());
-			builder.append(UID_SEPARATOR);
-    		builder.append(uids.getValue());
-    	}
-    	builder.append("]");
-    	return builder.toString();
+    	return new StringBuilder("[COPYUID ")
+    		.append(mailboxUidValidity)
+    		.append(" ")
+    		.append(Joiner.on(",").join(uidsOfCopiedAndNewMessages.keySet()))
+    		.append(" ")
+    		.append(Joiner.on(",").join(uidsOfCopiedAndNewMessages.values()))
+    		.append("]").toString();
 	}
 
 	/**

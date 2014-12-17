@@ -139,7 +139,7 @@ public class SmtpManager {
                 try {
                     GreenMailUser user = userManager.getUserByEmail(mailAddress.getEmail());
                     if (null == user) {
-                        user = userManager.createUser(mailAddress.getEmail(),mailAddress.getEmail(), mailAddress.getEmail());
+                        user = userManager.createUser(mailAddress.getEmail(),mailAddress.getEmail(), mailAddress.getEmail(), false);
                     }
 
                     user.deliver(msg);

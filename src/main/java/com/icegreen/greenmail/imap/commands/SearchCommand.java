@@ -18,6 +18,8 @@ import com.icegreen.greenmail.imap.commands.search.Before;
 import com.icegreen.greenmail.imap.commands.search.Criteria;
 import com.icegreen.greenmail.imap.commands.search.Deleted;
 import com.icegreen.greenmail.imap.commands.search.Not;
+import com.icegreen.greenmail.imap.commands.search.Or;
+import com.icegreen.greenmail.imap.commands.search.Uid;
 import com.icegreen.greenmail.store.FolderException;
 import com.icegreen.greenmail.store.MailFolder;
 import com.icegreen.greenmail.store.SimpleStoredMessage;
@@ -133,6 +135,8 @@ class SearchCommand extends SelectedStateCommand implements UidEnabledCommand {
             	return new Not(parseCriteria(request));
             } else if (criteria.equals("ALL")) {
             	return null;
+            } else if (criteria.equals("OR")) {
+            	return new Or(parseCriteria(request), parseCriteria(request));
             } else if (criteria.equals("DELETED")) {
             	return new Deleted();
             } else if (criteria.equals("(DELETED)")) {
@@ -140,9 +144,14 @@ class SearchCommand extends SelectedStateCommand implements UidEnabledCommand {
             } else if (criteria.equals("BEFORE")) {
             	String date = readNextToken(request);
             	return new Before(date);
+            } else if (criteria.equals("SINCE")) {
+            	String date = readNextToken(request);
+            	return new Not(new Before(date));
             } else if (criteria.equals("AFTER")) {
             	String date = readNextToken(request);
             	return new After(date);
+            } else if (criteria.equals("UID")) {
+            	return new Uid(readNextToken(request));
             }
             throw new ProtocolException("criteria not supported : "  + criteria);
         }

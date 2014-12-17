@@ -94,7 +94,7 @@ class ListCommand extends AuthenticatedStateCommand {
         }
 
         String personalNamespace = USER_NAMESPACE + HIERARCHY_DELIMITER_CHAR +
-                session.getUser().getQualifiedMailboxName();
+                session.getUser().getQualifiedMailboxName() + HIERARCHY_DELIMITER_CHAR;
         int prefixLength = personalNamespace.length();
 
         Iterator<MailFolder> iterator = mailboxes.iterator();
@@ -113,8 +113,11 @@ class ListCommand extends AuthenticatedStateCommand {
                 if (mailboxName.length() <= prefixLength) {
                     mailboxName = "";
                 } else {
-                    mailboxName = mailboxName.substring(prefixLength + 1);
+                    mailboxName = mailboxName.substring(prefixLength);
                 }
+            }
+            if (mailboxName.startsWith(HIERARCHY_DELIMITER)) {
+            	mailboxName = mailboxName.substring(HIERARCHY_DELIMITER.length());
             }
 
             // TODO: need to check if the mailbox name needs quoting.

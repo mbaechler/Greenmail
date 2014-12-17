@@ -52,10 +52,12 @@ public class ImapCommandFactory {
 
         // RFC2086 GETACL, SETACL, DELETEACL, LISTRIGHTS, MYRIGHTS
 //        _imapCommands.put( "GETACL", GetAclCommand.class );
-//        _imapCommands.put( "SETACL", SetAclCommand.class );
+        _imapCommands.put( "SETACL", SetAclCommand.class );
 //        _imapCommands.put( "DELETEACL", DeleteAclCommand.class );
 //        _imapCommands.put( "LISTRIGHTS", ListRightsCommand.class );
 //        _imapCommands.put( "MYRIGHTS", MyRightsCommand.class );
+        _imapCommands.put( "SETQUOTA", SetQuotaCommand.class );
+        _imapCommands.put( "SETANNOTATION", SetAnnotationCommand.class );
 
 
         // Commands only valid in SELECTED state.

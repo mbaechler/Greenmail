@@ -11,19 +11,27 @@ public class Uid implements Criteria {
 
 	private final Range<Long> range;
 
-	public Uid(String simpleClosedRange) throws ProtocolException {
-		Iterator<String> split = Splitter.on(':').split(simpleClosedRange).iterator();
+	public Uid(String uids) throws ProtocolException {
+		if (!uids.contains(":")) {
+			range = Range.singleton(Long.parseLong(uids));
+		} else {
+			range = simpleClosedRange(uids);
+		}
+	}
+
+	private Range<Long> simpleClosedRange(String uids) {
+		Iterator<String> split = Splitter.on(":").split(uids).iterator();
 		if (!split.hasNext()) {
-			throw new IllegalStateException(String.format("Not enough values in %s", simpleClosedRange));
+			throw new IllegalStateException(String.format("Not enough values in %s", uids));
 		}
 		long lower = Long.parseLong(split.next());
 		
 		if (!split.hasNext()) {
-			throw new IllegalStateException(String.format("Not enough values in %s", simpleClosedRange));
+			throw new IllegalStateException(String.format("Not enough values in %s", uids));
 		}
 		long higher = higher(split.next());
 		
-		range = Range.closed(lower, higher);
+		return Range.closed(lower, higher);
 	}
 
 	private long higher(String value) {

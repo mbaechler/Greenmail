@@ -6,14 +6,20 @@
  */
 package com.icegreen.greenmail.imap;
 
-import com.icegreen.greenmail.user.GreenMailUser;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
+
 import com.icegreen.greenmail.store.FolderException;
+import com.icegreen.greenmail.store.InMemoryStore;
 import com.icegreen.greenmail.store.MailFolder;
 import com.icegreen.greenmail.store.SimpleStoredMessage;
 import com.icegreen.greenmail.store.Store;
-import com.icegreen.greenmail.store.InMemoryStore;
-
-import java.util.*;
+import com.icegreen.greenmail.user.GreenMailUser;
 
 /**
  * An initial implementation of an ImapHost. By default, uses,
@@ -42,26 +48,37 @@ public class ImapHostManagerImpl
     }
 
     public List<SimpleStoredMessage> getAllMessages() {
-        List<SimpleStoredMessage> ret = new ArrayList<SimpleStoredMessage>();
         try {
-            Collection<MailFolder> boxes = store.listMailboxes("*");
-            for (Iterator<MailFolder> iterator = boxes.iterator(); iterator.hasNext();) {
-                MailFolder folder = iterator.next();
-                List<SimpleStoredMessage> messages = folder.getMessages();
-                for (int i = 0; i < messages.size(); i++) {
-                    ret.add(messages.get(i));
-                }
-            }
+        	return getAllMessages(store.listMailboxes("*"));
         } catch (FolderException e) {
             throw new RuntimeException(e);
         }
-        return ret;
+    }
+
+    public List<SimpleStoredMessage> getAllMessages(GreenMailUser user) {
+        try {
+        	return getAllMessages(listMailboxes(user, "*"));
+        } catch (FolderException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private List<SimpleStoredMessage> getAllMessages(Collection<MailFolder> boxes) {
+        List<SimpleStoredMessage> ret = new ArrayList<SimpleStoredMessage>();
+		for (Iterator<MailFolder> iterator = boxes.iterator(); iterator.hasNext();) {
+		    MailFolder folder = iterator.next();
+		    List<SimpleStoredMessage> messages = folder.getMessages();
+		    for (int i = 0; i < messages.size(); i++) {
+		        ret.add(messages.get(i));
+		    }
+		}
+		return ret;
     }
 
     public char getHierarchyDelimiter() {
         return HIERARCHY_DELIMITER_CHAR;
     }
-
+    
     /**
      * @throws FolderException 
      * @see ImapHostManager#getFolder

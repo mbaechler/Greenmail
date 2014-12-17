@@ -6,13 +6,13 @@
  */
 package com.icegreen.greenmail.imap;
 
-import com.icegreen.greenmail.user.GreenMailUser;
+import java.util.Collection;
+import java.util.List;
+
 import com.icegreen.greenmail.store.FolderException;
 import com.icegreen.greenmail.store.MailFolder;
 import com.icegreen.greenmail.store.SimpleStoredMessage;
-
-import java.util.Collection;
-import java.util.List;
+import com.icegreen.greenmail.user.GreenMailUser;
 
 /**
  * A host machine that has an IMAP4rev1 messaging server. There should be one
@@ -33,6 +33,9 @@ import java.util.List;
 public interface ImapHostManager {
 
     List<SimpleStoredMessage> getAllMessages();
+    
+    List<SimpleStoredMessage> getAllMessages(GreenMailUser user);
+    
     /**
      * Returns the hierarchy delimiter for mailboxes on this host.
      *

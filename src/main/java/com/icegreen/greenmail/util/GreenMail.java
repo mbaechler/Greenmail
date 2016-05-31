@@ -199,10 +199,17 @@ public class GreenMail {
     }
 
     /**
-     * This method can be used as an easy 'catch-all' mechanism.
-     * @param domain returns all receved messages arrived to domain.
-     */
+     * @deprecated use {@link #getReceivedMessagesForDomain(String)} instead.
+     */    @Deprecated
     public MimeMessage[] getReceviedMessagesForDomain(String domain) {
+        return getReceivedMessagesForDomain(domain);
+    }
+
+    /**
+     * This method can be used as an easy 'catch-all' mechanism.
+     * @param domain returns all received messages arrived to domain.
+     */
+    public MimeMessage[] getReceivedMessagesForDomain(String domain) {
         List<SimpleStoredMessage> msgs = managers.getImapHostManager().getAllMessages();
         List<MimeMessage> ret = new ArrayList<MimeMessage>();
         try {
